@@ -3,10 +3,10 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 
 export default function StudentSignUp() {
-  // Navigation Steps: 'form' -> 'otp' -> 'success'
+  // Mga Hakbang sa Porma: 'form' -> 'otp' -> 'success'
   const [currentStep, setCurrentStep] = useState('form');
 
-  // Form Fields
+  // Mga Form Field
   const [schoolId, setSchoolId] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -39,7 +39,7 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  // Pag-reset sa form pabalik sa Sign Up screen
+  // Pag-reset sa porma pabalik sa sinugdanan
   const handleBackToSignUp = () => {
     setSchoolId('');
     setFullName('');
@@ -50,12 +50,12 @@ export default function StudentSignUp() {
     setCurrentStep('form');
   };
 
-  // STEP 1: Susiha ang Form, Email Format, Supabase DB, ug Ipadala ang OTP
+  // STEP 1: Pagsusi sa DB, Gmail format, ug Pagpadala sa OTP
   const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
-    // 1. Validasyon sa School ID (Format: 2024-0516)
+    // 1. Validasyon sa School ID
     const cleanId = schoolId.trim();
     const idPattern = /^\d{4}-\d{4,5}$/;
     if (!idPattern.test(cleanId)) {
@@ -66,7 +66,7 @@ export default function StudentSignUp() {
       return;
     }
 
-    // 2. Higpit nga Validasyon sa Gmail Format (dili modawat og @gmail.con o sayop nga spelling)
+    // 2. Higpit nga Validasyon sa Gmail Address
     const cleanEmail = email.trim().toLowerCase();
     const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (!gmailPattern.test(cleanEmail)) {
@@ -96,7 +96,7 @@ export default function StudentSignUp() {
         }
       }
 
-      // 4. Generate 6-digit OTP
+      // 4. Generate og 6-digit OTP
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
       setServerOtp(generatedCode);
       setOtpExpiry(Date.now() + 10 * 60 * 1000);
@@ -238,6 +238,14 @@ export default function StudentSignUp() {
       <Head>
         <title>Student Registration • CECTRACK</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <style>{`
+          @keyframes popCelebration {
+            0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
+            50% { transform: scale(1.15) rotate(8deg); }
+            70% { transform: scale(0.95) rotate(-4deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+          }
+        `}</style>
       </Head>
 
       <div
@@ -255,7 +263,7 @@ export default function StudentSignUp() {
       >
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          {/* Logo container: Mogawas LAMANG sa Step 1 (Sign Up Form) */}
+          {/* Ang logo mogawas LAMANG sa Step 1 (Registration Form) */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -560,7 +568,7 @@ export default function StudentSignUp() {
               {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
             </button>
 
-            {/* Back button gamit ang < Chevron Icon */}
+            {/* Back button nga may < Chevron Icon */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
               <button
                 type="button"
@@ -612,10 +620,73 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS SCREEN (Wala na ang Default Password box) */}
+        {/* STEP 3: SUCCESS SCREEN (Party Celebration / Confetti Popper Icon) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
+            {/* Colorful Celebration Popper Icon nga may pop animation */}
+            <div
+              style={{
+                width: '74px',
+                height: '74px',
+                margin: '0 auto 14px auto',
+                animation: 'popCelebration 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="68" height="68" viewBox="0 0 48 48" fill="none">
+                {/* Party Cone Popper */}
+                <path
+                  d="M10.5 37.5L7 41C6.2 41.8 7.2 42.8 8 42L11.5 38.5L10.5 37.5Z"
+                  fill="#F59E0B"
+                />
+                <path
+                  d="M10 38L22 26L14 18L7 35C6.5 36.2 7.8 37.5 9 37.8L10 38Z"
+                  fill="#F59E0B"
+                />
+                <path
+                  d="M14 18L18 22L11 29L7 25L14 18Z"
+                  fill="#EF4444"
+                />
+                <path
+                  d="M18 22L22 26L15 33L11 29L18 22Z"
+                  fill="#3B82F6"
+                />
+                
+                {/* Confetti Ribbons & Streamers */}
+                <path
+                  d="M24 16C26 12 30 14 32 10C33 8 32 6 30 5"
+                  stroke="#3B82F6"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M27 24C31 23 33 27 38 26C41 25.5 42 23 41 21"
+                  stroke="#EC4899"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M20 12C21 8 25 7 26 3"
+                  stroke="#10B981"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                />
+
+                {/* Confetti Sparks & Dots */}
+                <circle cx="36" cy="14" r="2.5" fill="#EC4899" />
+                <circle cx="28" cy="7" r="2" fill="#F59E0B" />
+                <circle cx="39" cy="32" r="2" fill="#3B82F6" />
+                <circle cx="19" cy="8" r="2" fill="#8B5CF6" />
+                <circle cx="32" cy="20" r="1.5" fill="#10B981" />
+                <path
+                  d="M34 4L35.5 7L38.5 7.5L36 9.5L37 12.5L34 11L31 12.5L32 9.5L29.5 7.5L32.5 7L34 4Z"
+                  fill="#FBBF24"
+                />
+              </svg>
+            </div>
+
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
               Registration Verified!
             </h3>
