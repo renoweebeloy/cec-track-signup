@@ -23,9 +23,8 @@ export default function StudentSignUp() {
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ type: '', message: '' });
 
-  // ILISI KINI SA IMONG TINAUD NGA GOOGLE APPS SCRIPT WEB APP URL
+  // Google Apps Script Web App URL
   const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzuVn8MyNNu472-_t3HWfcZNVZVNDOEs9VNrKihAc2fshTrGrmxzRnysvZf4t7-TFU/exec';
-  const MAIN_LOGIN_URL = 'https://cec-track.vercel.app/login';
 
   const coursesList = [
     { code: 'BSCRIM', name: 'BS in Criminology' },
@@ -40,7 +39,18 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  // STEP 1: Pagsusi sa DB ug Pagpadala sa OTP Email
+  // Function aron mobalik sa Sign Up ug limpyohan ang form fields
+  const handleBackToSignUp = () => {
+    setSchoolId('');
+    setFullName('');
+    setEmail('');
+    setUserOtp('');
+    setServerOtp('');
+    setNotification({ type: '', message: '' });
+    setCurrentStep('form');
+  };
+
+  // STEP 1: Pagsusi ug Pagpadala sa OTP
   const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -59,7 +69,7 @@ export default function StudentSignUp() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // 1. Susiha kon narehistro na ba ang School ID o Email sa Supabase
+      // Susiha kon rehistrado na ba daan ang ID o Email
       const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
         .select('school_id, email')
@@ -75,12 +85,12 @@ export default function StudentSignUp() {
         }
       }
 
-      // 2. Mag-generate og 6-digit verification code
+      // Generate ug 6-digit OTP
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
       setServerOtp(generatedCode);
       setOtpExpiry(Date.now() + 10 * 60 * 1000); // 10 minutos validity
 
-      // 3. Ipadala ang OTP pinaagi sa Google Apps Script
+      // Ipadala pinaagi sa Google Apps Script
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -89,6 +99,7 @@ export default function StudentSignUp() {
           email: cleanEmail,
           code: generatedCode,
           name: fullName.trim(),
+          type: 'registration',
         }),
       });
 
@@ -107,7 +118,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // STEP 2: Pag-verify sa OTP ug Pag-insert sa Supabase Database
+  // STEP 2: Pag-verify sa OTP ug Pag-save sa Profile
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -133,7 +144,6 @@ export default function StudentSignUp() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // I-insert ang bag-ong estudyante sa profiles table
       const { error: insertError } = await supabase.from('profiles').insert([
         {
           school_id: cleanId,
@@ -160,14 +170,14 @@ export default function StudentSignUp() {
     } catch (err) {
       setNotification({
         type: 'error',
-        message: err.message || 'Failed to save account to database.',
+        message: err.message || 'Failed to complete registration.',
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Pag-resend sa OTP kon gikinahanglan
+  // Pag-resend sa OTP
   const handleResendOtp = async () => {
     setLoading(true);
     setNotification({ type: '', message: '' });
@@ -184,6 +194,7 @@ export default function StudentSignUp() {
           email: email.trim().toLowerCase(),
           code: newCode,
           name: fullName.trim(),
+          type: 'registration',
         }),
       });
       setNotification({
@@ -230,37 +241,8 @@ export default function StudentSignUp() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Institutional Crest / Logo Header */}
+        {/* Header Title (Walay Logo Icon) */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <div
-            style={{
-              width: '64px',
-              height: '64px',
-              margin: '0 auto 14px auto',
-              borderRadius: '50%',
-              backgroundColor: '#15803d',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 6px 18px rgba(21, 128, 61, 0.25)',
-              border: '3px solid #dcfce7',
-            }}
-          >
-            <svg
-              width="32"
-              height="32"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#ffffff"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
-              <path d="M6 12v5c3 3 9 3 12 0v-5" />
-            </svg>
-          </div>
-
           <span
             style={{
               display: 'inline-flex',
@@ -275,7 +257,7 @@ export default function StudentSignUp() {
               fontWeight: 900,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              marginBottom: '8px',
+              marginBottom: '10px',
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#15803d' }}></span>
@@ -288,7 +270,7 @@ export default function StudentSignUp() {
             {currentStep === 'otp'
               ? 'Enter the 6-digit authentication code sent to your Gmail inbox.'
               : currentStep === 'success'
-              ? 'Your account is now activated in the CECTRACK database.'
+              ? 'Your account has been officially verified and activated.'
               : 'Submit your student details to activate your digital attendance profile.'}
           </p>
         </div>
@@ -582,7 +564,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS & REDIRECT SCREEN */}
+        {/* STEP 3: SUCCESS SCREEN (Balik sa Sign Up) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
@@ -590,7 +572,7 @@ export default function StudentSignUp() {
               Registration Verified!
             </h3>
             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now proceed to the official login portal to configure your permanent password and download your digital QR ID.
+              Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now return to register another account.
             </p>
 
             <div
@@ -608,28 +590,27 @@ export default function StudentSignUp() {
               Default Password: <strong>{schoolId}</strong>
             </div>
 
-            {/* BUTON NGA MO-ABLI SA LOGIN PORTAL SA BAG-ONG WEBSITE / TAB */}
-            <a
-              href={MAIN_LOGIN_URL}
-              target="_blank"
-              rel="noopener noreferrer"
+            {/* BUTTON NGA MOBALIK SA SIGN UP FORM */}
+            <button
+              type="button"
+              onClick={handleBackToSignUp}
               style={{
                 display: 'block',
                 width: '100%',
                 padding: '13px',
                 backgroundColor: '#15803d',
                 color: '#ffffff',
-                textDecoration: 'none',
+                border: 'none',
                 borderRadius: '12px',
                 fontSize: '0.94rem',
                 fontWeight: 900,
                 textAlign: 'center',
-                boxSizing: 'border-box',
+                cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
               }}
             >
-              Open Login Portal in New Tab ➔
-            </a>
+              Back to Sign Up ➔
+            </button>
           </div>
         )}
       </div>
