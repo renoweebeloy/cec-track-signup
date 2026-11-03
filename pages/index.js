@@ -39,7 +39,7 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  // Function aron mobalik sa Sign Up ug limpyohan ang form fields
+  // Mobalik sa Sign Up form ug i-reset ang fields
   const handleBackToSignUp = () => {
     setSchoolId('');
     setFullName('');
@@ -50,7 +50,7 @@ export default function StudentSignUp() {
     setCurrentStep('form');
   };
 
-  // STEP 1: Pagsusi ug Pagpadala sa OTP
+  // STEP 1: Susiha ang DB ug Ipadala ang OTP Email
   const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -69,7 +69,6 @@ export default function StudentSignUp() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // Susiha kon rehistrado na ba daan ang ID o Email
       const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
         .select('school_id, email')
@@ -85,12 +84,10 @@ export default function StudentSignUp() {
         }
       }
 
-      // Generate ug 6-digit OTP
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
       setServerOtp(generatedCode);
-      setOtpExpiry(Date.now() + 10 * 60 * 1000); // 10 minutos validity
+      setOtpExpiry(Date.now() + 10 * 60 * 1000);
 
-      // Ipadala pinaagi sa Google Apps Script
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -118,7 +115,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // STEP 2: Pag-verify sa OTP ug Pag-save sa Profile
+  // STEP 2: I-verify ang OTP ug I-save sa Supabase
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -149,7 +146,7 @@ export default function StudentSignUp() {
           school_id: cleanId,
           full_name: fullName.trim(),
           email: cleanEmail,
-          password: cleanId, // Temporary password matches School ID
+          password: cleanId,
           course: course,
           year_level: yearLevel,
           section: section,
@@ -177,7 +174,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // Pag-resend sa OTP
+  // Resend OTP
   const handleResendOtp = async () => {
     setLoading(true);
     setNotification({ type: '', message: '' });
@@ -241,8 +238,24 @@ export default function StudentSignUp() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Header Title (Walay Logo Icon) */}
+        {/* Header Header nga may Custom Logo Picture */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <img
+            src="/logo.png"
+            alt="CECTRACK Logo"
+            onError={(e) => {
+              // Dili maguba kon wala pa ma-upload ang logo
+              e.currentTarget.style.display = 'none';
+            }}
+            style={{
+              width: '74px',
+              height: '74px',
+              objectFit: 'contain',
+              margin: '0 auto 12px auto',
+              display: 'block',
+            }}
+          />
+
           <span
             style={{
               display: 'inline-flex',
@@ -294,7 +307,7 @@ export default function StudentSignUp() {
           </div>
         )}
 
-        {/* STEP 1: INITIAL REGISTRATION FORM */}
+        {/* STEP 1: INITIAL REGISTRATION FORM (Wala na ang confirmation message box) */}
         {currentStep === 'form' && (
           <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -442,20 +455,6 @@ export default function StudentSignUp() {
               </select>
             </div>
 
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                border: '1px solid #e2e8f0',
-                fontSize: '0.75rem',
-                color: '#64748b',
-                lineHeight: 1.4,
-              }}
-            >
-              🔒 A 6-digit confirmation code will be dispatched to your Gmail to authenticate your registration.
-            </div>
-
             <button
               type="submit"
               disabled={loading}
@@ -470,7 +469,7 @@ export default function StudentSignUp() {
                 fontWeight: 900,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
-                marginTop: '4px',
+                marginTop: '8px',
                 touchAction: 'manipulation',
               }}
             >
@@ -590,7 +589,6 @@ export default function StudentSignUp() {
               Default Password: <strong>{schoolId}</strong>
             </div>
 
-            {/* BUTTON NGA MOBALIK SA SIGN UP FORM */}
             <button
               type="button"
               onClick={handleBackToSignUp}
