@@ -39,7 +39,7 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  // Mobalik sa Sign Up form ug i-reset ang fields
+  // Pag-reset ng form pabalik sa Sign Up screen
   const handleBackToSignUp = () => {
     setSchoolId('');
     setFullName('');
@@ -50,7 +50,7 @@ export default function StudentSignUp() {
     setCurrentStep('form');
   };
 
-  // STEP 1: Susiha ang DB ug Ipadala ang OTP Email
+  // STEP 1: Pagsusuri sa database at pagpapadala ng OTP sa Gmail
   const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -115,7 +115,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // STEP 2: I-verify ang OTP ug I-save sa Supabase
+  // STEP 2: Pag-verify ng OTP at pag-save sa Supabase
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -174,7 +174,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // Resend OTP
+  // Pag-resend ng OTP
   const handleResendOtp = async () => {
     setLoading(true);
     setNotification({ type: '', message: '' });
@@ -238,24 +238,40 @@ export default function StudentSignUp() {
           boxSizing: 'border-box',
         }}
       >
-        {/* Header Header nga may Custom Logo Picture */}
+        {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <img
-            src="/logo.png"
-            alt="CECTRACK Logo"
-            onError={(e) => {
-              // Dili maguba kon wala pa ma-upload ang logo
-              e.currentTarget.style.display = 'none';
-            }}
-            style={{
-              width: '74px',
-              height: '74px',
-              objectFit: 'contain',
-              margin: '0 auto 12px auto',
-              display: 'block',
-            }}
-          />
+          {/* Lalabas lamang ang logo kapag nasa unang step (registration form) */}
+          {currentStep === 'form' && (
+            <div
+              style={{
+                width: '68px',
+                height: '68px',
+                margin: '0 auto 14px auto',
+                borderRadius: '18px',
+                backgroundColor: '#f0fdf4',
+                border: '1.5px solid #bbf7d0',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(34, 197, 94, 0.12)',
+              }}
+            >
+              <img
+                src="/logo.png"
+                alt="CEC-TRACK Logo"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+                style={{
+                  width: '48px',
+                  height: '48px',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
+          )}
 
+          {/* Badge: CEC-TRACK na lamang (tinanggal ang salitang SYSTEM) */}
           <span
             style={{
               display: 'inline-flex',
@@ -274,8 +290,9 @@ export default function StudentSignUp() {
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#15803d' }}></span>
-            CEC-TRACK SYSTEM
+            CEC-TRACK
           </span>
+
           <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
             {currentStep === 'otp' ? 'Email Verification' : currentStep === 'success' ? 'Verified!' : 'Student Sign Up'}
           </h1>
@@ -307,7 +324,7 @@ export default function StudentSignUp() {
           </div>
         )}
 
-        {/* STEP 1: INITIAL REGISTRATION FORM (Wala na ang confirmation message box) */}
+        {/* STEP 1: REGISTRATION FORM */}
         {currentStep === 'form' && (
           <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -478,7 +495,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 2: OTP VERIFICATION SCREEN */}
+        {/* STEP 2: OTP VERIFICATION SCREEN (Walang logo at walang babala) */}
         {currentStep === 'otp' && (
           <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ textAlign: 'center' }}>
@@ -507,21 +524,6 @@ export default function StudentSignUp() {
                 required
                 autoFocus
               />
-            </div>
-
-            <div
-              style={{
-                backgroundColor: '#fef2f2',
-                border: '1px solid #fecaca',
-                padding: '10px 12px',
-                borderRadius: '10px',
-                fontSize: '0.74rem',
-                color: '#991b1b',
-                textAlign: 'center',
-                lineHeight: 1.4,
-              }}
-            >
-              ⚠️ <strong>Do not share this OTP with anyone.</strong> Please do not reply to the automated Gmail message.
             </div>
 
             <button
@@ -563,7 +565,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS SCREEN (Balik sa Sign Up) */}
+        {/* STEP 3: SUCCESS SCREEN (Walang logo at updated ang registration text) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
@@ -571,7 +573,7 @@ export default function StudentSignUp() {
               Registration Verified!
             </h3>
             <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now return to register another account.
+              Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now log in your account.
             </p>
 
             <div
