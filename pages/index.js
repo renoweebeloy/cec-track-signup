@@ -10,23 +10,18 @@ export default function StudentSignUp() {
   const [course, setCourse] = useState('BSCRIM');
   const [yearLevel, setYearLevel] = useState('1st Year');
   const [section, setSection] = useState('Section A');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
 
   // UI Status States
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ type: '', message: '' });
   const [isSuccess, setIsSuccess] = useState(false);
 
-  // Link paingon sa imong Main Login Portal
-  const MAIN_LOGIN_URL = 'https://cec-track.vercel.app/login';
-
   const coursesList = [
-    { code: 'BSCRIM', name: 'BS Criminology' },
-    { code: 'BSBA', name: 'BS Business Administration' },
-    { code: 'BSA', name: 'BS Accountancy' },
+    { code: 'BSCRIM', name: 'BS in Criminology' },
+    { code: 'BSBA', name: 'BS in Business Administration' },
+    { code: 'BSA', name: 'BS in Accountancy' },
     { code: 'BEED', name: 'Bachelor of Elementary Education' },
-    { code: 'BSAM', name: 'BS Agribusiness Management' },
+    { code: 'BSAM', name: 'BS in Agribusiness Management' },
   ];
 
   const sectionsList = [
@@ -38,30 +33,13 @@ export default function StudentSignUp() {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
-    // 1. Validasyon sa School ID Format (e.g. 2024-0516)
+    // 1. School ID Format Validation (e.g. 2024-0516)
     const cleanId = schoolId.trim();
     const idPattern = /^\d{4}-\d{4,5}$/;
     if (!idPattern.test(cleanId)) {
       setNotification({
         type: 'error',
-        message: 'Sayop ang pormat sa School ID. Gamita ang format nga: 2024-0516',
-      });
-      return;
-    }
-
-    // 2. Validasyon sa Password
-    if (password.length < 6) {
-      setNotification({
-        type: 'error',
-        message: 'Ang password kinahanglang labing menos 6 ka karakter.',
-      });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setNotification({
-        type: 'error',
-        message: 'Wala magkatugma ang Confirm Password.',
+        message: 'Invalid School ID format. Please use the pattern: 2024-0516',
       });
       return;
     }
@@ -70,7 +48,7 @@ export default function StudentSignUp() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // 3. Pagsusi kon rehistrado na ba ang ID o Email sa 'profiles' table
+      // 2. Check if School ID or Email is already registered
       const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
         .select('school_id, email')
@@ -79,27 +57,28 @@ export default function StudentSignUp() {
 
       if (existingUser) {
         if (existingUser.school_id === cleanId) {
-          throw new Error(`Ang School ID "${cleanId}" rehistrado na daan.`);
+          throw new Error(`School ID "${cleanId}" is already registered.`);
         }
         if (existingUser.email === cleanEmail) {
-          throw new Error(`Ang Email "${cleanEmail}" nagamit na sa laing account.`);
+          throw new Error(`Email "${cleanEmail}" is already associated with another account.`);
         }
       }
 
-      // 4. Pag-insert sa bag-ong estudyante sa Supabase
+      // 3. Insert student record into Supabase
+      // Default password is set to their School ID, requiring password change upon initial login
       const { error: insertError } = await supabase.from('profiles').insert([
         {
           school_id: cleanId,
           full_name: fullName.trim(),
           email: cleanEmail,
-          password: password.trim(),
+          password: cleanId,
           course: course,
           year_level: yearLevel,
           section: section,
           role: 'student',
           can_scan: false,
           status: 'Active',
-          must_change_password: false,
+          must_change_password: true,
         },
       ]);
 
@@ -108,12 +87,12 @@ export default function StudentSignUp() {
       setIsSuccess(true);
       setNotification({
         type: 'success',
-        message: 'Malampusong narehistro ang imong account!',
+        message: 'Student account registered successfully!',
       });
     } catch (err) {
       setNotification({
         type: 'error',
-        message: err.message || 'Adunay sayop sa pag-rehistro.',
+        message: err.message || 'An error occurred during registration. Please try again.',
       });
     } finally {
       setLoading(false);
@@ -129,7 +108,7 @@ export default function StudentSignUp() {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        padding: '24px 16px',
+        padding: '32px 16px',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
     >
@@ -143,15 +122,44 @@ export default function StudentSignUp() {
           width: '100%',
           maxWidth: '460px',
           backgroundColor: '#ffffff',
-          borderRadius: '26px',
+          borderRadius: '24px',
           padding: '32px 24px',
           boxShadow: '0 12px 36px rgba(0, 0, 0, 0.06)',
           border: '1px solid #e2e8f0',
           boxSizing: 'border-box',
         }}
       >
-        {/* Header Title & Badge */}
-        <div style={{ textAlign: 'center', marginBottom: '22px' }}>
+        {/* Institutional Crest / Logo Header */}
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <div
+            style={{
+              width: '64px',
+              height: '64px',
+              margin: '0 auto 14px auto',
+              borderRadius: '50%',
+              backgroundColor: '#15803d',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 6px 18px rgba(21, 128, 61, 0.25)',
+              border: '3px solid #dcfce7',
+            }}
+          >
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#ffffff"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+              <path d="M6 12v5c3 3 9 3 12 0v-5" />
+            </svg>
+          </div>
+
           <span
             style={{
               display: 'inline-flex',
@@ -162,25 +170,25 @@ export default function StudentSignUp() {
               border: '1px solid #bbf7d0',
               padding: '4px 14px',
               borderRadius: '9999px',
-              fontSize: '0.74rem',
+              fontSize: '0.72rem',
               fontWeight: 900,
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
-              marginBottom: '10px',
+              marginBottom: '8px',
             }}
           >
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#15803d' }}></span>
-            CEC-TRACK
+            CEC-TRACK SYSTEM
           </span>
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
+          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
             Student Sign Up
           </h1>
           <p style={{ fontSize: '0.84rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-            Isulod ang imong mga impormasyon aron makamugna og opisyal nga scannable attendance account.
+            Submit your student details to activate your digital attendance profile.
           </p>
         </div>
 
-        {/* Notipikasyon (Success / Error Alert) */}
+        {/* Alerts / Feedback Message */}
         {notification.message && (
           <div
             style={{
@@ -200,33 +208,27 @@ export default function StudentSignUp() {
         )}
 
         {isSuccess ? (
-          <div style={{ textAlign: 'center', padding: '12px 0' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '10px' }}>✅</div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
-              Rehistrasyon Malampuson!
+          <div style={{ textAlign: 'center', padding: '16px 8px' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
+              Registration Successful!
             </h3>
-            <p style={{ fontSize: '0.84rem', color: '#64748b', margin: '0 0 22px 0', lineHeight: 1.5 }}>
-              Ang imong School ID (<strong>{schoolId}</strong>) narehistro na sa sistema. Mahimo ka nang mag-log in sa imong portal aron ma-activate ang imong Attendance QR Code.
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.55 }}>
+              Your School ID (<strong>{schoolId}</strong>) has been officially recorded. You may now log in via the student portal using your registered Gmail and School ID to configure your permanent password.
             </p>
-            <a
-              href={MAIN_LOGIN_URL}
+            <div
               style={{
-                display: 'block',
-                width: '100%',
-                padding: '13px',
-                backgroundColor: '#15803d',
-                color: '#ffffff',
-                textDecoration: 'none',
+                backgroundColor: '#f8fafc',
+                border: '1px dashed #cbd5e1',
+                padding: '12px',
                 borderRadius: '12px',
-                fontSize: '0.92rem',
-                fontWeight: 900,
-                textAlign: 'center',
-                boxSizing: 'border-box',
-                boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
+                fontSize: '0.78rem',
+                color: '#475569',
+                fontWeight: 600,
               }}
             >
-              Adto sa Log In Page ➔
-            </a>
+              Default Password: <strong>{schoolId}</strong>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -237,7 +239,7 @@ export default function StudentSignUp() {
               </label>
               <input
                 type="text"
-                placeholder="Pananglitan: 2024-0516"
+                placeholder="Format: 2024-0516"
                 value={schoolId}
                 onChange={(e) => setSchoolId(e.target.value)}
                 style={{
@@ -256,11 +258,11 @@ export default function StudentSignUp() {
             {/* Full Name Input */}
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Kumpletong Pangalan *
+                Full Name *
               </label>
               <input
                 type="text"
-                placeholder="Pananglitan: Juan Dela Cruz"
+                placeholder="e.g. Juan Dela Cruz"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 style={{
@@ -276,14 +278,14 @@ export default function StudentSignUp() {
               />
             </div>
 
-            {/* Gmail / Email Input */}
+            {/* Gmail / Email Address Input */}
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
                 Gmail / Email Address *
               </label>
               <input
                 type="email"
-                placeholder="Pananglitan: student@gmail.com"
+                placeholder="e.g. student@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 style={{
@@ -303,7 +305,7 @@ export default function StudentSignUp() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                  Kurso *
+                  Course *
                 </label>
                 <select
                   value={course}
@@ -356,7 +358,7 @@ export default function StudentSignUp() {
             {/* Section Selection */}
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Seksiyon *
+                Section *
               </label>
               <select
                 value={section}
@@ -380,51 +382,19 @@ export default function StudentSignUp() {
               </select>
             </div>
 
-            {/* Password Fields Row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                  Password *
-                </label>
-                <input
-                  type="password"
-                  placeholder="Min. 6 chars"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 12px',
-                    borderRadius: '11px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                  Confirm *
-                </label>
-                <input
-                  type="password"
-                  placeholder="I-type usab"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 12px',
-                    borderRadius: '11px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
-                  required
-                />
-              </div>
+            {/* Information Notice */}
+            <div
+              style={{
+                backgroundColor: '#f8fafc',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                border: '1px solid #e2e8f0',
+                fontSize: '0.75rem',
+                color: '#64748b',
+                lineHeight: 1.4,
+              }}
+            >
+              🔒 Initial password will automatically match your <strong>School ID</strong>. You will be prompted to set a new password upon your first sign-in.
             </div>
 
             {/* Submit Button */}
@@ -442,34 +412,18 @@ export default function StudentSignUp() {
                 fontWeight: 900,
                 cursor: loading ? 'not-allowed' : 'pointer',
                 boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
-                marginTop: '6px',
+                marginTop: '4px',
                 touchAction: 'manipulation',
               }}
             >
-              {loading ? 'Giproseso ang Rehistrasyon...' : 'Sign Up Account ➔'}
+              {loading ? 'Processing Registration...' : 'Complete Registration ➔'}
             </button>
-
-            {/* Balik sa Log In Link */}
-            <div style={{ textAlign: 'center', marginTop: '10px' }}>
-              <span style={{ fontSize: '0.78rem', color: '#64748b' }}>Naa na kay account? </span>
-              <a
-                href={MAIN_LOGIN_URL}
-                style={{
-                  fontSize: '0.78rem',
-                  fontWeight: 900,
-                  color: '#15803d',
-                  textDecoration: 'none',
-                }}
-              >
-                Mag Log In Dinhi ➔
-              </a>
-            </div>
           </form>
         )}
       </div>
 
-      <div style={{ marginTop: '22px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.04em' }}>
-        © 2026 CEC-TRACK • CATEEL EXTENSION CAMPUS
+      <div style={{ marginTop: '24px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.04em' }}>
+        © 2026 CEC-TRACK • DOrSU CATEEL EXTENSION CAMPUS
       </div>
     </div>
   );
