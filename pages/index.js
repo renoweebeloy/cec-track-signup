@@ -39,7 +39,7 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  // Pag-reset ng form pabalik sa Sign Up screen
+  // Pag-reset sa form pabalik sa Sign Up screen
   const handleBackToSignUp = () => {
     setSchoolId('');
     setFullName('');
@@ -50,11 +50,12 @@ export default function StudentSignUp() {
     setCurrentStep('form');
   };
 
-  // STEP 1: Pagsusuri sa database at pagpapadala ng OTP sa Gmail
+  // STEP 1: Susiha ang Form, Email Format, Supabase DB, ug Ipadala ang OTP
   const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
+    // 1. Validasyon sa School ID (Format: 2024-0516)
     const cleanId = schoolId.trim();
     const idPattern = /^\d{4}-\d{4,5}$/;
     if (!idPattern.test(cleanId)) {
@@ -65,10 +66,21 @@ export default function StudentSignUp() {
       return;
     }
 
-    setLoading(true);
+    // 2. Higpit nga Validasyon sa Gmail Format (dili modawat og @gmail.con o sayop nga spelling)
     const cleanEmail = email.trim().toLowerCase();
+    const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!gmailPattern.test(cleanEmail)) {
+      setNotification({
+        type: 'error',
+        message: 'Invalid email address. Please enter a valid Gmail account ending with @gmail.com',
+      });
+      return;
+    }
+
+    setLoading(true);
 
     try {
+      // 3. Susiha kon narehistro na ba ang School ID o Email
       const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
         .select('school_id, email')
@@ -84,10 +96,12 @@ export default function StudentSignUp() {
         }
       }
 
+      // 4. Generate 6-digit OTP
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
       setServerOtp(generatedCode);
       setOtpExpiry(Date.now() + 10 * 60 * 1000);
 
+      // 5. Ipadala sa Gmail pinaagi sa Google Apps Script
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -115,7 +129,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // STEP 2: Pag-verify ng OTP at pag-save sa Supabase
+  // STEP 2: Pag-verify sa OTP ug Pag-save sa Supabase
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -174,7 +188,7 @@ export default function StudentSignUp() {
     }
   };
 
-  // Pag-resend ng OTP
+  // Pag-resend sa OTP
   const handleResendOtp = async () => {
     setLoading(true);
     setNotification({ type: '', message: '' });
@@ -236,11 +250,12 @@ export default function StudentSignUp() {
           boxShadow: '0 12px 36px rgba(0, 0, 0, 0.06)',
           border: '1px solid #e2e8f0',
           boxSizing: 'border-box',
+          position: 'relative',
         }}
       >
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          {/* Lalabas lamang ang logo kapag nasa unang step (registration form) */}
+          {/* Logo container: Mogawas LAMANG sa Step 1 (Sign Up Form) */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -271,7 +286,7 @@ export default function StudentSignUp() {
             </div>
           )}
 
-          {/* Badge: CEC-TRACK na lamang (tinanggal ang salitang SYSTEM) */}
+          {/* Badge: CEC-TRACK */}
           <span
             style={{
               display: 'inline-flex',
@@ -324,7 +339,7 @@ export default function StudentSignUp() {
           </div>
         )}
 
-        {/* STEP 1: REGISTRATION FORM */}
+        {/* STEP 1: INITIAL REGISTRATION FORM */}
         {currentStep === 'form' && (
           <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -373,7 +388,7 @@ export default function StudentSignUp() {
 
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Gmail / Email Address *
+                Gmail Address *
               </label>
               <input
                 type="email"
@@ -495,7 +510,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 2: OTP VERIFICATION SCREEN (Walang logo at walang babala) */}
+        {/* STEP 2: OTP VERIFICATION SCREEN */}
         {currentStep === 'otp' && (
           <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ textAlign: 'center' }}>
@@ -545,19 +560,51 @@ export default function StudentSignUp() {
               {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
             </button>
 
+            {/* Back button gamit ang < Chevron Icon */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
               <button
                 type="button"
                 onClick={() => setCurrentStep('form')}
-                style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'none',
+                  border: 'none',
+                  color: '#475569',
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  padding: '4px 0',
+                }}
               >
-                ← Back to Edit Details
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#475569"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                <span>Back to Edit Details</span>
               </button>
+
               <button
                 type="button"
                 onClick={handleResendOtp}
                 disabled={loading}
-                style={{ background: 'none', border: 'none', color: '#15803d', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#15803d',
+                  fontSize: '0.82rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
               >
                 Resend Code
               </button>
@@ -565,31 +612,16 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS SCREEN (Walang logo at updated ang registration text) */}
+        {/* STEP 3: SUCCESS SCREEN (Wala na ang Default Password box) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
             <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
               Registration Verified!
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.55 }}>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
               Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now log in your account.
             </p>
-
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                padding: '12px',
-                borderRadius: '12px',
-                fontSize: '0.78rem',
-                color: '#475569',
-                fontWeight: 600,
-                marginBottom: '20px',
-              }}
-            >
-              Default Password: <strong>{schoolId}</strong>
-            </div>
 
             <button
               type="button"
