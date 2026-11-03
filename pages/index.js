@@ -3,7 +3,10 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 
 export default function StudentSignUp() {
-  // Form State Values
+  // Navigation Steps: 'form' -> 'otp' -> 'success'
+  const [currentStep, setCurrentStep] = useState('form');
+
+  // Form Fields
   const [schoolId, setSchoolId] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -11,10 +14,18 @@ export default function StudentSignUp() {
   const [yearLevel, setYearLevel] = useState('1st Year');
   const [section, setSection] = useState('Section A');
 
-  // UI Status States
+  // OTP Verification States
+  const [serverOtp, setServerOtp] = useState('');
+  const [userOtp, setUserOtp] = useState('');
+  const [otpExpiry, setOtpExpiry] = useState(null);
+
+  // UI Status
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ type: '', message: '' });
-  const [isSuccess, setIsSuccess] = useState(false);
+
+  // ILISI KINI SA IMONG TINAUD NGA GOOGLE APPS SCRIPT WEB APP URL
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzuVn8MyNNu472-_t3HWfcZNVZVNDOEs9VNrKihAc2fshTrGrmxzRnysvZf4t7-TFU/exec';
+  const MAIN_LOGIN_URL = 'https://cec-track.vercel.app/login';
 
   const coursesList = [
     { code: 'BSCRIM', name: 'BS in Criminology' },
@@ -29,11 +40,11 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  const handleRegister = async (e) => {
+  // STEP 1: Pagsusi sa DB ug Pagpadala sa OTP Email
+  const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
-    // 1. School ID Format Validation (e.g. 2024-0516)
     const cleanId = schoolId.trim();
     const idPattern = /^\d{4}-\d{4,5}$/;
     if (!idPattern.test(cleanId)) {
@@ -48,7 +59,7 @@ export default function StudentSignUp() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // 2. Check if School ID or Email is already registered
+      // 1. Susiha kon narehistro na ba ang School ID o Email sa Supabase
       const { data: existingUser, error: checkError } = await supabase
         .from('profiles')
         .select('school_id, email')
@@ -64,14 +75,71 @@ export default function StudentSignUp() {
         }
       }
 
-      // 3. Insert student record into Supabase
-      // Default password is set to their School ID, requiring password change upon initial login
+      // 2. Mag-generate og 6-digit verification code
+      const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
+      setServerOtp(generatedCode);
+      setOtpExpiry(Date.now() + 10 * 60 * 1000); // 10 minutos validity
+
+      // 3. Ipadala ang OTP pinaagi sa Google Apps Script
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: cleanEmail,
+          code: generatedCode,
+          name: fullName.trim(),
+        }),
+      });
+
+      setCurrentStep('otp');
+      setNotification({
+        type: 'success',
+        message: `Verification code sent to ${cleanEmail}. Please check your inbox or spam folder.`,
+      });
+    } catch (err) {
+      setNotification({
+        type: 'error',
+        message: err.message || 'Failed to send verification code. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // STEP 2: Pag-verify sa OTP ug Pag-insert sa Supabase Database
+  const handleVerifyOtp = async (e) => {
+    e.preventDefault();
+    setNotification({ type: '', message: '' });
+
+    if (Date.now() > otpExpiry) {
+      setNotification({
+        type: 'error',
+        message: 'The verification code has expired. Please request a new code.',
+      });
+      return;
+    }
+
+    if (userOtp.trim() !== serverOtp) {
+      setNotification({
+        type: 'error',
+        message: 'Incorrect verification code. Please check your email and try again.',
+      });
+      return;
+    }
+
+    setLoading(true);
+    const cleanId = schoolId.trim();
+    const cleanEmail = email.trim().toLowerCase();
+
+    try {
+      // I-insert ang bag-ong estudyante sa profiles table
       const { error: insertError } = await supabase.from('profiles').insert([
         {
           school_id: cleanId,
           full_name: fullName.trim(),
           email: cleanEmail,
-          password: cleanId,
+          password: cleanId, // Temporary password matches School ID
           course: course,
           year_level: yearLevel,
           section: section,
@@ -84,15 +152,48 @@ export default function StudentSignUp() {
 
       if (insertError) throw new Error(insertError.message);
 
-      setIsSuccess(true);
+      setCurrentStep('success');
       setNotification({
         type: 'success',
-        message: 'Student account registered successfully!',
+        message: 'Account successfully verified and registered!',
       });
     } catch (err) {
       setNotification({
         type: 'error',
-        message: err.message || 'An error occurred during registration. Please try again.',
+        message: err.message || 'Failed to save account to database.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Pag-resend sa OTP kon gikinahanglan
+  const handleResendOtp = async () => {
+    setLoading(true);
+    setNotification({ type: '', message: '' });
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+    setServerOtp(newCode);
+    setOtpExpiry(Date.now() + 10 * 60 * 1000);
+
+    try {
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          code: newCode,
+          name: fullName.trim(),
+        }),
+      });
+      setNotification({
+        type: 'success',
+        message: 'A fresh verification code has been dispatched to your email.',
+      });
+    } catch (err) {
+      setNotification({
+        type: 'error',
+        message: 'Unable to resend code. Please try again.',
       });
     } finally {
       setLoading(false);
@@ -113,7 +214,7 @@ export default function StudentSignUp() {
       }}
     >
       <Head>
-        <title>Student Registration • CEC-TRACK</title>
+        <title>Student Registration • CECTRACK</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       </Head>
 
@@ -181,14 +282,18 @@ export default function StudentSignUp() {
             CEC-TRACK SYSTEM
           </span>
           <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
-            Student Sign Up
+            {currentStep === 'otp' ? 'Email Verification' : currentStep === 'success' ? 'Verified!' : 'Student Sign Up'}
           </h1>
           <p style={{ fontSize: '0.84rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-            Submit your student details to activate your digital attendance profile.
+            {currentStep === 'otp'
+              ? 'Enter the 6-digit authentication code sent to your Gmail inbox.'
+              : currentStep === 'success'
+              ? 'Your account is now activated in the CECTRACK database.'
+              : 'Submit your student details to activate your digital attendance profile.'}
           </p>
         </div>
 
-        {/* Alerts / Feedback Message */}
+        {/* Feedback Alert Box */}
         {notification.message && (
           <div
             style={{
@@ -207,32 +312,9 @@ export default function StudentSignUp() {
           </div>
         )}
 
-        {isSuccess ? (
-          <div style={{ textAlign: 'center', padding: '16px 8px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
-              Registration Successful!
-            </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 16px 0', lineHeight: 1.55 }}>
-              Your School ID (<strong>{schoolId}</strong>) has been officially recorded. You may now log in via the student portal using your registered Gmail and School ID to configure your permanent password.
-            </p>
-            <div
-              style={{
-                backgroundColor: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                padding: '12px',
-                borderRadius: '12px',
-                fontSize: '0.78rem',
-                color: '#475569',
-                fontWeight: 600,
-              }}
-            >
-              Default Password: <strong>{schoolId}</strong>
-            </div>
-          </div>
-        ) : (
-          <form onSubmit={handleRegister} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-            {/* School ID Input */}
+        {/* STEP 1: INITIAL REGISTRATION FORM */}
+        {currentStep === 'form' && (
+          <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
                 School ID *
@@ -255,7 +337,6 @@ export default function StudentSignUp() {
               />
             </div>
 
-            {/* Full Name Input */}
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
                 Full Name *
@@ -278,7 +359,6 @@ export default function StudentSignUp() {
               />
             </div>
 
-            {/* Gmail / Email Address Input */}
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
                 Gmail / Email Address *
@@ -301,7 +381,6 @@ export default function StudentSignUp() {
               />
             </div>
 
-            {/* Course & Year Level Row */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
@@ -355,7 +434,6 @@ export default function StudentSignUp() {
               </div>
             </div>
 
-            {/* Section Selection */}
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
                 Section *
@@ -382,7 +460,6 @@ export default function StudentSignUp() {
               </select>
             </div>
 
-            {/* Information Notice */}
             <div
               style={{
                 backgroundColor: '#f8fafc',
@@ -394,10 +471,9 @@ export default function StudentSignUp() {
                 lineHeight: 1.4,
               }}
             >
-              🔒 Initial password will automatically match your <strong>School ID</strong>. You will be prompted to set a new password upon your first sign-in.
+              🔒 A 6-digit confirmation code will be dispatched to your Gmail to authenticate your registration.
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={loading}
@@ -416,9 +492,145 @@ export default function StudentSignUp() {
                 touchAction: 'manipulation',
               }}
             >
-              {loading ? 'Processing Registration...' : 'Complete Registration ➔'}
+              {loading ? 'Sending Verification Code...' : 'Complete Registration ➔'}
             </button>
           </form>
+        )}
+
+        {/* STEP 2: OTP VERIFICATION SCREEN */}
+        {currentStep === 'otp' && (
+          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ textAlign: 'center' }}>
+              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#334155', marginBottom: '8px' }}>
+                Enter 6-Digit Verification Code
+              </label>
+              <input
+                type="text"
+                maxLength="6"
+                placeholder="• • • • • •"
+                value={userOtp}
+                onChange={(e) => setUserOtp(e.target.value.replace(/\D/g, ''))}
+                style={{
+                  width: '100%',
+                  padding: '14px',
+                  borderRadius: '12px',
+                  border: '2px solid #15803d',
+                  fontSize: '1.6rem',
+                  fontWeight: 900,
+                  textAlign: 'center',
+                  letterSpacing: '8px',
+                  boxSizing: 'border-box',
+                  outline: 'none',
+                  backgroundColor: '#f8fafc',
+                }}
+                required
+                autoFocus
+              />
+            </div>
+
+            <div
+              style={{
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                padding: '10px 12px',
+                borderRadius: '10px',
+                fontSize: '0.74rem',
+                color: '#991b1b',
+                textAlign: 'center',
+                lineHeight: 1.4,
+              }}
+            >
+              ⚠️ <strong>Do not share this OTP with anyone.</strong> Please do not reply to the automated Gmail message.
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading || userOtp.length < 6}
+              style={{
+                width: '100%',
+                padding: '13px',
+                backgroundColor: '#15803d',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '0.94rem',
+                fontWeight: 900,
+                cursor: loading || userOtp.length < 6 ? 'not-allowed' : 'pointer',
+                boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
+              }}
+            >
+              {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
+            </button>
+
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
+              <button
+                type="button"
+                onClick={() => setCurrentStep('form')}
+                style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}
+              >
+                ← Back to Edit Details
+              </button>
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={loading}
+                style={{ background: 'none', border: 'none', color: '#15803d', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
+              >
+                Resend Code
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* STEP 3: SUCCESS & REDIRECT SCREEN */}
+        {currentStep === 'success' && (
+          <div style={{ textAlign: 'center', padding: '16px 8px' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
+              Registration Verified!
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 20px 0', lineHeight: 1.55 }}>
+              Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now proceed to the official login portal to configure your permanent password and download your digital QR ID.
+            </p>
+
+            <div
+              style={{
+                backgroundColor: '#f8fafc',
+                border: '1px dashed #cbd5e1',
+                padding: '12px',
+                borderRadius: '12px',
+                fontSize: '0.78rem',
+                color: '#475569',
+                fontWeight: 600,
+                marginBottom: '20px',
+              }}
+            >
+              Default Password: <strong>{schoolId}</strong>
+            </div>
+
+            {/* BUTON NGA MO-ABLI SA LOGIN PORTAL SA BAG-ONG WEBSITE / TAB */}
+            <a
+              href={MAIN_LOGIN_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '13px',
+                backgroundColor: '#15803d',
+                color: '#ffffff',
+                textDecoration: 'none',
+                borderRadius: '12px',
+                fontSize: '0.94rem',
+                fontWeight: 900,
+                textAlign: 'center',
+                boxSizing: 'border-box',
+                boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
+              }}
+            >
+              Open Login Portal in New Tab ➔
+            </a>
+          </div>
         )}
       </div>
 
