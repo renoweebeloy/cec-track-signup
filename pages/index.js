@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 // I-set sa `true` aron i-close ang website.
 // I-set sa `false` kon gusto na nimo ablihan pag-usab ang registration.
 // =========================================================================
-const IS_SIGNUP_CLOSED = true;
+const IS_SIGNUP_CLOSED = false;
 
 export default function StudentSignUp() {
   // Navigation Steps: 'form' -> 'otp' -> 'success'
