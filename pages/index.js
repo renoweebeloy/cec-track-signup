@@ -3,9 +3,9 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 
 // =========================================================================
-// TOGGLE SWITCH PARA SA SIGN-UP WEBSITE:
-// I-set sa `true`  -> Sirado ang website (Mao kini ang mogawas karon).
-// I-set sa `false` -> Bukas na ang sign-up form para sa mga estudyante.
+// TOGGLE SWITCH PARA SA SIGN-UP PORTAL:
+// I-set sa `true` kung nais pansamantalang isara ang portal.
+// I-set sa `false` upang buksan ang pagpaparehistro para sa mga estudyante.
 // =========================================================================
 const IS_SIGNUP_CLOSED = false;
 
@@ -47,7 +47,7 @@ export default function StudentSignUp() {
   ];
 
   // =========================================================================
-  // 1. TEMPORARILY CLOSED SCREEN (Mogawas kon IS_SIGNUP_CLOSED = true)
+  // SCREEN KUNG NAKASARA ANG PORTAL (IS_SIGNUP_CLOSED = true)
   // =========================================================================
   if (IS_SIGNUP_CLOSED) {
     return (
@@ -64,7 +64,7 @@ export default function StudentSignUp() {
         }}
       >
         <Head>
-          <title>Registration Closed • CECTRACK</title>
+          <title>Portal Closed • CECTRACK</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         </Head>
 
@@ -81,7 +81,6 @@ export default function StudentSignUp() {
             textAlign: 'center',
           }}
         >
-          {/* Logo Container */}
           <div
             style={{
               width: '68px',
@@ -102,11 +101,7 @@ export default function StudentSignUp() {
               onError={(e) => {
                 e.currentTarget.style.display = 'none';
               }}
-              style={{
-                width: '48px',
-                height: '48px',
-                objectFit: 'contain',
-              }}
+              style={{ width: '48px', height: '48px', objectFit: 'contain' }}
             />
           </div>
 
@@ -163,7 +158,7 @@ export default function StudentSignUp() {
   }
 
   // =========================================================================
-  // 2. REGISTRATION WORKFLOW (Mogawas kon IS_SIGNUP_CLOSED = false)
+  // NORMAL NA REGISTRATION LOGIC
   // =========================================================================
   const handleBackToSignUp = () => {
     setSchoolId('');
@@ -355,14 +350,6 @@ export default function StudentSignUp() {
       <Head>
         <title>Student Registration • CECTRACK</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        <style>{`
-          @keyframes popCelebration {
-            0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
-            50% { transform: scale(1.15) rotate(8deg); }
-            70% { transform: scale(0.95) rotate(-4deg); }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-          }
-        `}</style>
       </Head>
 
       <div
@@ -370,16 +357,17 @@ export default function StudentSignUp() {
           width: '100%',
           maxWidth: '460px',
           backgroundColor: '#ffffff',
-          borderRadius: '24px',
-          padding: '32px 24px',
-          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.06)',
+          borderRadius: '28px',
+          padding: '36px 24px',
+          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.05)',
           border: '1px solid #e2e8f0',
           boxSizing: 'border-box',
           position: 'relative',
         }}
       >
         {/* Header Section */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+          {/* Logo container para lamang sa Step 1 */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -401,15 +389,12 @@ export default function StudentSignUp() {
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                 }}
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  objectFit: 'contain',
-                }}
+                style={{ width: '48px', height: '48px', objectFit: 'contain' }}
               />
             </div>
           )}
 
+          {/* Badge: CEC-TRACK */}
           <span
             style={{
               display: 'inline-flex',
@@ -431,7 +416,7 @@ export default function StudentSignUp() {
             CEC-TRACK
           </span>
 
-          <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
+          <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
             {currentStep === 'otp' ? 'Email Verification' : currentStep === 'success' ? 'Verified!' : 'Student Sign Up'}
           </h1>
           <p style={{ fontSize: '0.84rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
@@ -443,12 +428,14 @@ export default function StudentSignUp() {
           </p>
         </div>
 
+        {/* Feedback Alert Box */}
         {notification.message && (
           <div
             style={{
               marginBottom: '18px',
               fontSize: '0.82rem',
               fontWeight: 700,
+              textAlign: currentStep === 'success' ? 'center' : 'left',
               color: notification.type === 'error' ? '#b91c1c' : '#15803d',
               backgroundColor: notification.type === 'error' ? '#fef2f2' : '#f0fdf4',
               border: `1px solid ${notification.type === 'error' ? '#fee2e2' : '#bbf7d0'}`,
@@ -682,7 +669,6 @@ export default function StudentSignUp() {
               {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
             </button>
 
-            {/* Back button gamit ang < Chevron Icon */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
               <button
                 type="button"
@@ -734,44 +720,84 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS SCREEN (Party Popper / Celebration Icon) */}
+        {/* STEP 3: SUCCESS / VERIFIED SCREEN (Katulad sa Screenshot) */}
         {currentStep === 'success' && (
-          <div style={{ textAlign: 'center', padding: '16px 8px' }}>
+          <div style={{ textAlign: 'center', padding: '4px 8px 10px 8px' }}>
+            {/* Party Popper Celebration Icon */}
             <div
               style={{
-                width: '74px',
-                height: '74px',
-                margin: '0 auto 14px auto',
-                animation: 'popCelebration 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                width: '76px',
+                height: '76px',
+                margin: '10px auto 12px auto',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <svg width="68" height="68" viewBox="0 0 48 48" fill="none">
-                <path d="M10.5 37.5L7 41C6.2 41.8 7.2 42.8 8 42L11.5 38.5L10.5 37.5Z" fill="#F59E0B" />
-                <path d="M10 38L22 26L14 18L7 35C6.5 36.2 7.8 37.5 9 37.8L10 38Z" fill="#F59E0B" />
-                <path d="M14 18L18 22L11 29L7 25L14 18Z" fill="#EF4444" />
-                <path d="M18 22L22 26L15 33L11 29L18 22Z" fill="#3B82F6" />
-                <path d="M24 16C26 12 30 14 32 10C33 8 32 6 30 5" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M27 24C31 23 33 27 38 26C41 25.5 42 23 41 21" stroke="#EC4899" strokeWidth="2.5" strokeLinecap="round" />
-                <path d="M20 12C21 8 25 7 26 3" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
-                <circle cx="36" cy="14" r="2.5" fill="#EC4899" />
-                <circle cx="28" cy="7" r="2" fill="#F59E0B" />
-                <circle cx="39" cy="32" r="2" fill="#3B82F6" />
-                <circle cx="19" cy="8" r="2" fill="#8B5CF6" />
-                <circle cx="32" cy="20" r="1.5" fill="#10B981" />
-                <path d="M34 4L35.5 7L38.5 7.5L36 9.5L37 12.5L34 11L31 12.5L32 9.5L29.5 7.5L32.5 7L34 4Z" fill="#FBBF24" />
+              <svg width="74" height="74" viewBox="0 0 48 48" fill="none">
+                {/* Dilaw na Party Cone */}
+                <path
+                  d="M10 40L14 36L11 33L7 37C6.4 37.6 6.4 38.6 7 39.2L8.8 41C9.4 41.6 10.4 41.6 11 41L12 40L10 40Z"
+                  fill="#EAB308"
+                />
+                <path
+                  d="M11 33L25 21L17 13L8 35C7.6 36 8 37 9 37.5L11 33Z"
+                  fill="#FACC15"
+                />
+                <path
+                  d="M17 13L21 17L14 24L10 20L17 13Z"
+                  fill="#F43F5E"
+                />
+                <path
+                  d="M21 17L25 21L18 28L14 24L21 17Z"
+                  fill="#0EA5E9"
+                />
+                
+                {/* Makukulay na Confetti Ribbons & Streamers */}
+                <path
+                  d="M26 15C28 11 32 13 34 9C35 7 34 5 32 4"
+                  stroke="#F43F5E"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M29 23C33 22 35 26 40 25C42.5 24.5 43 22 42 20"
+                  stroke="#0EA5E9"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                />
+                <path
+                  d="M22 11C23.5 7 27 6 28 2.5"
+                  stroke="#EAB308"
+                  strokeWidth="2.6"
+                  strokeLinecap="round"
+                />
+
+                {/* Confetti Dots & Sparks */}
+                <circle cx="38" cy="13" r="2.5" fill="#EC4899" />
+                <circle cx="28" cy="6" r="2.2" fill="#FACC15" />
+                <circle cx="41" cy="31" r="2.2" fill="#0EA5E9" />
+                <circle cx="20" cy="7" r="2" fill="#A855F7" />
+                <circle cx="34" cy="19" r="1.8" fill="#10B981" />
+                <circle cx="43" cy="21" r="1.5" fill="#F97316" />
+                <path
+                  d="M36 3.5L37.2 6L40 6.4L38 8.2L38.6 11L36 9.6L33.4 11L34 8.2L32 6.4L34.8 6L36 3.5Z"
+                  fill="#FACC15"
+                />
               </svg>
             </div>
 
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
+            {/* Registration Verified Title */}
+            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
               Registration Verified!
             </h3>
-            <p style={{ fontSize: '0.85rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with School ID <strong>{schoolId}</strong>. You may now log in your account.
+
+            {/* Registration Confirmation Text */}
+            <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
+              Your account has been officially registered with School ID <strong>{schoolId || '2023-8407'}</strong>. You may now log in your account.
             </p>
 
+            {/* Malaking Green Button: Back to Sign Up ➔ */}
             <button
               type="button"
               onClick={handleBackToSignUp}
