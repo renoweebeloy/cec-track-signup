@@ -3,9 +3,9 @@ import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 
 // =========================================================================
-// TOGGLE SWITCH PARA SA SIGN-UP:
-// I-set sa `true` aron i-close ang website.
-// I-set sa `false` kon gusto na nimo ablihan pag-usab ang registration.
+// TOGGLE SWITCH PARA SA SIGN-UP WEBSITE:
+// I-set sa `true`  -> Sirado ang website (Mao kini ang mogawas karon).
+// I-set sa `false` -> Bukas na ang sign-up form para sa mga estudyante.
 // =========================================================================
 const IS_SIGNUP_CLOSED = false;
 
@@ -47,7 +47,7 @@ export default function StudentSignUp() {
   ];
 
   // =========================================================================
-  // SCREEN NGA MOGAWAS KON TEMPORARY CLOSED ANG WEBSITE
+  // 1. TEMPORARILY CLOSED SCREEN (Mogawas kon IS_SIGNUP_CLOSED = true)
   // =========================================================================
   if (IS_SIGNUP_CLOSED) {
     return (
@@ -64,7 +64,7 @@ export default function StudentSignUp() {
         }}
       >
         <Head>
-          <title>Portal Closed • CECTRACK Registration</title>
+          <title>Registration Closed • CECTRACK</title>
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
         </Head>
 
@@ -81,7 +81,7 @@ export default function StudentSignUp() {
             textAlign: 'center',
           }}
         >
-          {/* Logo Badge */}
+          {/* Logo Container */}
           <div
             style={{
               width: '68px',
@@ -132,11 +132,11 @@ export default function StudentSignUp() {
           </span>
 
           <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 12px 0' }}>
-            Registration Is Currently Closed
+            Sign-Up Portal Is Closed
           </h1>
 
-          <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 24px 0' }}>
-            This sign-up portal is temporarily closed and not accepting new student accounts at this time. It will be open and available soon, so please check back later for official updates.
+          <p style={{ fontSize: '0.90rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 20px 0' }}>
+            This website of sign up is closed. It will be open and available soon, so please come back soon. This website is not available right now because it is temporarily closed.
           </p>
 
           <div
@@ -151,7 +151,7 @@ export default function StudentSignUp() {
               fontWeight: 600,
             }}
           >
-            📢 <strong>Notice:</strong> Please wait for further announcements from your campus administrators or department officers before proceeding.
+            📢 <strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.
           </div>
         </div>
 
@@ -163,7 +163,7 @@ export default function StudentSignUp() {
   }
 
   // =========================================================================
-  // NORMAL NGA REGISTRATION FLOW (MOGAWAS KON IS_SIGNUP_CLOSED = false)
+  // 2. REGISTRATION WORKFLOW (Mogawas kon IS_SIGNUP_CLOSED = false)
   // =========================================================================
   const handleBackToSignUp = () => {
     setSchoolId('');
@@ -378,6 +378,7 @@ export default function StudentSignUp() {
           position: 'relative',
         }}
       >
+        {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           {currentStep === 'form' && (
             <div
@@ -460,6 +461,7 @@ export default function StudentSignUp() {
           </div>
         )}
 
+        {/* STEP 1: INITIAL REGISTRATION FORM */}
         {currentStep === 'form' && (
           <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -630,6 +632,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
+        {/* STEP 2: OTP VERIFICATION SCREEN */}
         {currentStep === 'otp' && (
           <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ textAlign: 'center' }}>
@@ -679,6 +682,7 @@ export default function StudentSignUp() {
               {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
             </button>
 
+            {/* Back button gamit ang < Chevron Icon */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
               <button
                 type="button"
@@ -730,6 +734,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
+        {/* STEP 3: SUCCESS SCREEN (Party Popper / Celebration Icon) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
             <div
