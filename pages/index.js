@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import Head from 'next/head';
 import { supabase } from '../lib/supabaseClient';
 
+// =========================================================================
+// TOGGLE SWITCH PARA SA SIGN-UP:
+// I-set sa `true` aron i-close ang website.
+// I-set sa `false` kon gusto na nimo ablihan pag-usab ang registration.
+// =========================================================================
+const IS_SIGNUP_CLOSED = true;
+
 export default function StudentSignUp() {
   // Navigation Steps: 'form' -> 'otp' -> 'success'
   const [currentStep, setCurrentStep] = useState('form');
@@ -39,7 +46,125 @@ export default function StudentSignUp() {
     'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
   ];
 
-  // Pag-reset sa form pabalik sa Sign Up screen
+  // =========================================================================
+  // SCREEN NGA MOGAWAS KON TEMPORARY CLOSED ANG WEBSITE
+  // =========================================================================
+  if (IS_SIGNUP_CLOSED) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          backgroundColor: '#f8fafc',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '32px 16px',
+          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        }}
+      >
+        <Head>
+          <title>Portal Closed • CECTRACK Registration</title>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        </Head>
+
+        <div
+          style={{
+            width: '100%',
+            maxWidth: '460px',
+            backgroundColor: '#ffffff',
+            borderRadius: '24px',
+            padding: '36px 28px',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.06)',
+            border: '1px solid #e2e8f0',
+            boxSizing: 'border-box',
+            textAlign: 'center',
+          }}
+        >
+          {/* Logo Badge */}
+          <div
+            style={{
+              width: '68px',
+              height: '68px',
+              margin: '0 auto 16px auto',
+              borderRadius: '18px',
+              backgroundColor: '#f0fdf4',
+              border: '1.5px solid #bbf7d0',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 4px 14px rgba(34, 197, 94, 0.12)',
+            }}
+          >
+            <img
+              src="/logo.png"
+              alt="CEC-TRACK Logo"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+              style={{
+                width: '48px',
+                height: '48px',
+                objectFit: 'contain',
+              }}
+            />
+          </div>
+
+          <span
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              backgroundColor: '#fef2f2',
+              color: '#b91c1c',
+              border: '1px solid #fecaca',
+              padding: '4px 14px',
+              borderRadius: '9999px',
+              fontSize: '0.72rem',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '0.06em',
+              marginBottom: '14px',
+            }}
+          >
+            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
+            TEMPORARILY CLOSED
+          </span>
+
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 12px 0' }}>
+            Registration Is Currently Closed
+          </h1>
+
+          <p style={{ fontSize: '0.88rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 24px 0' }}>
+            This sign-up portal is temporarily closed and not accepting new student accounts at this time. It will be open and available soon, so please check back later for official updates.
+          </p>
+
+          <div
+            style={{
+              backgroundColor: '#f8fafc',
+              border: '1px dashed #cbd5e1',
+              borderRadius: '14px',
+              padding: '14px 16px',
+              fontSize: '0.80rem',
+              color: '#475569',
+              lineHeight: 1.5,
+              fontWeight: 600,
+            }}
+          >
+            📢 <strong>Notice:</strong> Please wait for further announcements from your campus administrators or department officers before proceeding.
+          </div>
+        </div>
+
+        <div style={{ marginTop: '24px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.04em' }}>
+          © 2026 CEC-TRACK • DOrSU CATEEL EXTENSION CAMPUS
+        </div>
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // NORMAL NGA REGISTRATION FLOW (MOGAWAS KON IS_SIGNUP_CLOSED = false)
+  // =========================================================================
   const handleBackToSignUp = () => {
     setSchoolId('');
     setFullName('');
@@ -50,12 +175,10 @@ export default function StudentSignUp() {
     setCurrentStep('form');
   };
 
-  // STEP 1: Susiha ang Form, Email Format, Supabase DB, ug Ipadala ang OTP
   const handleInitiateRegistration = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
-    // 1. Validasyon sa School ID (Format: 2024-0516)
     const cleanId = schoolId.trim();
     const idPattern = /^\d{4}-\d{4,5}$/;
     if (!idPattern.test(cleanId)) {
@@ -66,7 +189,6 @@ export default function StudentSignUp() {
       return;
     }
 
-    // 2. Higpit nga Validasyon sa Gmail Format (dili modawat og @gmail.con o sayop nga spelling)
     const cleanEmail = email.trim().toLowerCase();
     const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
     if (!gmailPattern.test(cleanEmail)) {
@@ -80,8 +202,7 @@ export default function StudentSignUp() {
     setLoading(true);
 
     try {
-      // 3. Susiha kon narehistro na ba ang School ID o Email
-      const { data: existingUser, error: checkError } = await supabase
+      const { data: existingUser } = await supabase
         .from('profiles')
         .select('school_id, email')
         .or(`school_id.eq.${cleanId},email.eq.${cleanEmail}`)
@@ -96,12 +217,10 @@ export default function StudentSignUp() {
         }
       }
 
-      // 4. Generate 6-digit OTP
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
       setServerOtp(generatedCode);
       setOtpExpiry(Date.now() + 10 * 60 * 1000);
 
-      // 5. Ipadala sa Gmail pinaagi sa Google Apps Script
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -129,7 +248,6 @@ export default function StudentSignUp() {
     }
   };
 
-  // STEP 2: Pag-verify sa OTP ug Pag-save sa Supabase
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setNotification({ type: '', message: '' });
@@ -188,7 +306,6 @@ export default function StudentSignUp() {
     }
   };
 
-  // Pag-resend sa OTP
   const handleResendOtp = async () => {
     setLoading(true);
     setNotification({ type: '', message: '' });
@@ -238,6 +355,14 @@ export default function StudentSignUp() {
       <Head>
         <title>Student Registration • CECTRACK</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <style>{`
+          @keyframes popCelebration {
+            0% { transform: scale(0.6) rotate(-15deg); opacity: 0; }
+            50% { transform: scale(1.15) rotate(8deg); }
+            70% { transform: scale(0.95) rotate(-4deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+          }
+        `}</style>
       </Head>
 
       <div
@@ -253,9 +378,7 @@ export default function StudentSignUp() {
           position: 'relative',
         }}
       >
-        {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          {/* Logo container: Mogawas LAMANG sa Step 1 (Sign Up Form) */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -286,7 +409,6 @@ export default function StudentSignUp() {
             </div>
           )}
 
-          {/* Badge: CEC-TRACK */}
           <span
             style={{
               display: 'inline-flex',
@@ -320,7 +442,6 @@ export default function StudentSignUp() {
           </p>
         </div>
 
-        {/* Feedback Alert Box */}
         {notification.message && (
           <div
             style={{
@@ -339,7 +460,6 @@ export default function StudentSignUp() {
           </div>
         )}
 
-        {/* STEP 1: INITIAL REGISTRATION FORM */}
         {currentStep === 'form' && (
           <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
@@ -510,7 +630,6 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 2: OTP VERIFICATION SCREEN */}
         {currentStep === 'otp' && (
           <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div style={{ textAlign: 'center' }}>
@@ -560,7 +679,6 @@ export default function StudentSignUp() {
               {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
             </button>
 
-            {/* Back button gamit ang < Chevron Icon */}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
               <button
                 type="button"
@@ -612,10 +730,36 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS SCREEN (Wala na ang Default Password box) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '16px 8px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎉</div>
+            <div
+              style={{
+                width: '74px',
+                height: '74px',
+                margin: '0 auto 14px auto',
+                animation: 'popCelebration 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <svg width="68" height="68" viewBox="0 0 48 48" fill="none">
+                <path d="M10.5 37.5L7 41C6.2 41.8 7.2 42.8 8 42L11.5 38.5L10.5 37.5Z" fill="#F59E0B" />
+                <path d="M10 38L22 26L14 18L7 35C6.5 36.2 7.8 37.5 9 37.8L10 38Z" fill="#F59E0B" />
+                <path d="M14 18L18 22L11 29L7 25L14 18Z" fill="#EF4444" />
+                <path d="M18 22L22 26L15 33L11 29L18 22Z" fill="#3B82F6" />
+                <path d="M24 16C26 12 30 14 32 10C33 8 32 6 30 5" stroke="#3B82F6" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M27 24C31 23 33 27 38 26C41 25.5 42 23 41 21" stroke="#EC4899" strokeWidth="2.5" strokeLinecap="round" />
+                <path d="M20 12C21 8 25 7 26 3" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" />
+                <circle cx="36" cy="14" r="2.5" fill="#EC4899" />
+                <circle cx="28" cy="7" r="2" fill="#F59E0B" />
+                <circle cx="39" cy="32" r="2" fill="#3B82F6" />
+                <circle cx="19" cy="8" r="2" fill="#8B5CF6" />
+                <circle cx="32" cy="20" r="1.5" fill="#10B981" />
+                <path d="M34 4L35.5 7L38.5 7.5L36 9.5L37 12.5L34 11L31 12.5L32 9.5L29.5 7.5L32.5 7L34 4Z" fill="#FBBF24" />
+              </svg>
+            </div>
+
             <h3 style={{ fontSize: '1.25rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
               Registration Verified!
             </h3>
