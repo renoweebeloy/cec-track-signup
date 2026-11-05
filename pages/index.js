@@ -47,7 +47,7 @@ export default function StudentSignUp() {
   ];
 
   // =========================================================================
-  // SCREEN KUNG NAKASARA ANG PORTAL (IS_SIGNUP_CLOSED = true)
+  // SCREEN KUNG PANSAMANTALANG NAKASARA ANG PORTAL
   // =========================================================================
   if (IS_SIGNUP_CLOSED) {
     return (
@@ -367,7 +367,7 @@ export default function StudentSignUp() {
       >
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-          {/* Logo container para lamang sa Step 1 */}
+          {/* Ang logo ay lilitaw LAMANG sa Step 1 */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -720,71 +720,36 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS / VERIFIED SCREEN (Katulad sa Screenshot) */}
+        {/* STEP 3: SUCCESS / VERIFIED SCREEN (Eksaktong disenyo mula sa Pangalawang Larawan) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '4px 8px 10px 8px' }}>
-            {/* Party Popper Celebration Icon */}
+            {/* Opisyal na Google Noto Party Popper Logo Container */}
             <div
               style={{
-                width: '76px',
-                height: '76px',
-                margin: '10px auto 12px auto',
+                width: '74px',
+                height: '74px',
+                margin: '10px auto 14px auto',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <svg width="74" height="74" viewBox="0 0 48 48" fill="none">
-                {/* Dilaw na Party Cone */}
-                <path
-                  d="M10 40L14 36L11 33L7 37C6.4 37.6 6.4 38.6 7 39.2L8.8 41C9.4 41.6 10.4 41.6 11 41L12 40L10 40Z"
-                  fill="#EAB308"
-                />
-                <path
-                  d="M11 33L25 21L17 13L8 35C7.6 36 8 37 9 37.5L11 33Z"
-                  fill="#FACC15"
-                />
-                <path
-                  d="M17 13L21 17L14 24L10 20L17 13Z"
-                  fill="#F43F5E"
-                />
-                <path
-                  d="M21 17L25 21L18 28L14 24L21 17Z"
-                  fill="#0EA5E9"
-                />
-                
-                {/* Makukulay na Confetti Ribbons & Streamers */}
-                <path
-                  d="M26 15C28 11 32 13 34 9C35 7 34 5 32 4"
-                  stroke="#F43F5E"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M29 23C33 22 35 26 40 25C42.5 24.5 43 22 42 20"
-                  stroke="#0EA5E9"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M22 11C23.5 7 27 6 28 2.5"
-                  stroke="#EAB308"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
-                />
-
-                {/* Confetti Dots & Sparks */}
-                <circle cx="38" cy="13" r="2.5" fill="#EC4899" />
-                <circle cx="28" cy="6" r="2.2" fill="#FACC15" />
-                <circle cx="41" cy="31" r="2.2" fill="#0EA5E9" />
-                <circle cx="20" cy="7" r="2" fill="#A855F7" />
-                <circle cx="34" cy="19" r="1.8" fill="#10B981" />
-                <circle cx="43" cy="21" r="1.5" fill="#F97316" />
-                <path
-                  d="M36 3.5L37.2 6L40 6.4L38 8.2L38.6 11L36 9.6L33.4 11L34 8.2L32 6.4L34.8 6L36 3.5Z"
-                  fill="#FACC15"
-                />
-              </svg>
+              <img
+                src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f389.svg"
+                alt="Celebration Party Popper"
+                style={{
+                  width: '68px',
+                  height: '68px',
+                  objectFit: 'contain',
+                }}
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const fallback = e.currentTarget.nextElementSibling;
+                  if (fallback) fallback.style.display = 'block';
+                }}
+              />
+              {/* Native Fallback Emoji sakaling mabagal ang network */}
+              <span style={{ display: 'none', fontSize: '3.4rem', lineHeight: 1 }}>🎉</span>
             </div>
 
             {/* Registration Verified Title */}
