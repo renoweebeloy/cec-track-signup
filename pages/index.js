@@ -31,7 +31,7 @@ export default function StudentSignUp() {
   const [notification, setNotification] = useState({ type: '', message: '' });
 
   // Google Apps Script Web App URL
-  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzjgoLGF-UOPkahjMOHvvLvjgt-k17OEdnl_7dmhLgzLbztl3dVhHmHJfY1-STw09_3/exec';
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzzgxBbzaAjtwXBby3mKjVBLslpJtshjgGh68lKCW7raXpbiNinT3-uxNJ2FV5oy-PbWw/exec';
 
   const coursesList = [
     { code: 'BSCRIM', name: 'BS in Criminology' },
