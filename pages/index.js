@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
@@ -150,6 +151,24 @@ export default function StudentSignUp() {
             }}
           >
             📢 <strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.
+          </div>
+
+          <div style={{ marginTop: '20px' }}>
+            <button
+              type="button"
+              onClick={() => router.push('/login')}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#15803d',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                textDecoration: 'underline',
+              }}
+            >
+              Go to Login Portal ➔
+            </button>
           </div>
         </div>
 
@@ -370,7 +389,6 @@ export default function StudentSignUp() {
       >
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-          {/* Ang logo ay lilitaw LAMANG sa Step 1 */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -619,6 +637,41 @@ export default function StudentSignUp() {
             >
               {loading ? 'Sending Verification Code...' : 'Complete Registration ➔'}
             </button>
+
+            {/* BUTTON / LINK ARON MODIRETSO SA LOGIN */}
+            <div
+              style={{
+                textAlign: 'center',
+                marginTop: '12px',
+                paddingTop: '12px',
+                borderTop: '1px solid #f1f5f9',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '6px',
+              }}
+            >
+              <span style={{ fontSize: '0.84rem', color: '#64748b', fontWeight: 600 }}>
+                Already registered?
+              </span>
+              <button
+                type="button"
+                onClick={() => router.push('/login')}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#15803d',
+                  fontSize: '0.84rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  padding: 0,
+                  textDecoration: 'underline',
+                  touchAction: 'manipulation',
+                }}
+              >
+                Log In here ➔
+              </button>
+            </div>
           </form>
         )}
 
