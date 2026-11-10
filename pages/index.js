@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 // =========================================================================
@@ -11,8 +10,6 @@ import { supabase } from '../lib/supabaseClient';
 const IS_SIGNUP_CLOSED = false;
 
 export default function StudentSignUp() {
-  const router = useRouter();
-
   // Navigation Steps: 'form' -> 'otp' -> 'success'
   const [currentStep, setCurrentStep] = useState('form');
 
@@ -150,24 +147,6 @@ export default function StudentSignUp() {
             }}
           >
             📢 <strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.
-          </div>
-
-          <div style={{ marginTop: '20px' }}>
-            <button
-              type="button"
-              onClick={() => router.push('/')}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#15803d',
-                fontSize: '0.85rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                textDecoration: 'underline',
-              }}
-            >
-              Go to Home Portal ➔
-            </button>
           </div>
         </div>
 
@@ -388,6 +367,7 @@ export default function StudentSignUp() {
       >
         {/* Header Section */}
         <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+          {/* Ang logo ay lilitaw LAMANG sa Step 1 */}
           {currentStep === 'form' && (
             <div
               style={{
@@ -636,41 +616,6 @@ export default function StudentSignUp() {
             >
               {loading ? 'Sending Verification Code...' : 'Complete Registration ➔'}
             </button>
-
-            {/* BUTTON / LINK ARON MODIRETSO SA HOME (/) */}
-            <div
-              style={{
-                textAlign: 'center',
-                marginTop: '12px',
-                paddingTop: '12px',
-                borderTop: '1px solid #f1f5f9',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '6px',
-              }}
-            >
-              <span style={{ fontSize: '0.84rem', color: '#64748b', fontWeight: 600 }}>
-                Already registered?
-              </span>
-              <button
-                type="button"
-                onClick={() => router.push('/')}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#15803d',
-                  fontSize: '0.84rem',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  padding: 0,
-                  textDecoration: 'underline',
-                  touchAction: 'manipulation',
-                }}
-              >
-                Log In here ➔
-              </button>
-            </div>
           </form>
         )}
 
@@ -775,7 +720,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS / VERIFIED SCREEN (DIRECT PAINGON SA HOME /) */}
+        {/* STEP 3: SUCCESS / VERIFIED SCREEN */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '4px 8px 10px 8px' }}>
             <div
@@ -810,13 +755,12 @@ export default function StudentSignUp() {
             </h3>
 
             <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in to your account.
+              Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in your account.
             </p>
 
-            {/* BUTTON NGA DIRETSO SA HOME PAGE (/) */}
             <button
               type="button"
-              onClick={() => router.push('/')}
+              onClick={handleBackToSignUp}
               style={{
                 display: 'block',
                 width: '100%',
@@ -830,27 +774,9 @@ export default function StudentSignUp() {
                 textAlign: 'center',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
-                touchAction: 'manipulation',
               }}
             >
-              Go to Login ➔
-            </button>
-
-            <button
-              type="button"
-              onClick={handleBackToSignUp}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#64748b',
-                fontSize: '0.82rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                marginTop: '12px',
-                textDecoration: 'underline',
-              }}
-            >
-              Register Another Account
+              Back to Sign Up ➔
             </button>
           </div>
         )}
