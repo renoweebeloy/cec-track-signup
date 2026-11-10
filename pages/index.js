@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 // =========================================================================
@@ -10,6 +11,8 @@ import { supabase } from '../lib/supabaseClient';
 const IS_SIGNUP_CLOSED = false;
 
 export default function StudentSignUp() {
+  const router = useRouter();
+
   // Navigation Steps: 'form' -> 'otp' -> 'success'
   const [currentStep, setCurrentStep] = useState('form');
 
@@ -755,12 +758,12 @@ export default function StudentSignUp() {
             </h3>
 
             <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in your account.
+              Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in to your account.
             </p>
 
             <button
               type="button"
-              onClick={handleBackToSignUp}
+              onClick={() => router.push('/login')}
               style={{
                 display: 'block',
                 width: '100%',
@@ -774,9 +777,27 @@ export default function StudentSignUp() {
                 textAlign: 'center',
                 cursor: 'pointer',
                 boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
+                touchAction: 'manipulation',
               }}
             >
-              Back to Sign Up ➔
+              Go to Login ➔
+            </button>
+
+            <button
+              type="button"
+              onClick={handleBackToSignUp}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: '#64748b',
+                fontSize: '0.82rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                marginTop: '12px',
+                textDecoration: 'underline',
+              }}
+            >
+              Register Another Account
             </button>
           </div>
         )}
