@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
@@ -156,7 +155,7 @@ export default function StudentSignUp() {
           <div style={{ marginTop: '20px' }}>
             <button
               type="button"
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/')}
               style={{
                 background: 'none',
                 border: 'none',
@@ -167,7 +166,7 @@ export default function StudentSignUp() {
                 textDecoration: 'underline',
               }}
             >
-              Go to Login Portal ➔
+              Go to Home Portal ➔
             </button>
           </div>
         </div>
@@ -638,7 +637,7 @@ export default function StudentSignUp() {
               {loading ? 'Sending Verification Code...' : 'Complete Registration ➔'}
             </button>
 
-            {/* BUTTON / LINK ARON MODIRETSO SA LOGIN */}
+            {/* BUTTON / LINK ARON MODIRETSO SA HOME (/) */}
             <div
               style={{
                 textAlign: 'center',
@@ -656,7 +655,7 @@ export default function StudentSignUp() {
               </span>
               <button
                 type="button"
-                onClick={() => router.push('/login')}
+                onClick={() => router.push('/')}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -776,7 +775,7 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS / VERIFIED SCREEN */}
+        {/* STEP 3: SUCCESS / VERIFIED SCREEN (DIRECT PAINGON SA HOME /) */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '4px 8px 10px 8px' }}>
             <div
@@ -814,9 +813,10 @@ export default function StudentSignUp() {
               Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in to your account.
             </p>
 
+            {/* BUTTON NGA DIRETSO SA HOME PAGE (/) */}
             <button
               type="button"
-              onClick={() => router.push('/login')}
+              onClick={() => router.push('/')}
               style={{
                 display: 'block',
                 width: '100%',
