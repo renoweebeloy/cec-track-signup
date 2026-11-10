@@ -14,7 +14,7 @@ export default function StudentSignUp() {
   const [currentStep, setCurrentStep] = useState('form');
 
   // Form Fields
-  const [schoolId, setSchoolId] = useState('');
+  const [studentId, setStudentId] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [course, setCourse] = useState('BSCRIM');
@@ -161,7 +161,7 @@ export default function StudentSignUp() {
   // NORMAL NA REGISTRATION LOGIC
   // =========================================================================
   const handleBackToSignUp = () => {
-    setSchoolId('');
+    setStudentId('');
     setFullName('');
     setEmail('');
     setUserOtp('');
@@ -174,12 +174,12 @@ export default function StudentSignUp() {
     e.preventDefault();
     setNotification({ type: '', message: '' });
 
-    const cleanId = schoolId.trim();
+    const cleanId = studentId.trim();
     const idPattern = /^\d{4}-\d{4,5}$/;
     if (!idPattern.test(cleanId)) {
       setNotification({
         type: 'error',
-        message: 'Invalid School ID format. Please use the pattern: 2024-0516',
+        message: 'Invalid Student ID format. Please use the pattern: 2024-0516',
       });
       return;
     }
@@ -205,7 +205,7 @@ export default function StudentSignUp() {
 
       if (existingUser) {
         if (existingUser.school_id === cleanId) {
-          throw new Error(`School ID "${cleanId}" is already registered.`);
+          throw new Error(`Student ID "${cleanId}" is already registered.`);
         }
         if (existingUser.email === cleanEmail) {
           throw new Error(`Email "${cleanEmail}" is already associated with another account.`);
@@ -264,7 +264,7 @@ export default function StudentSignUp() {
     }
 
     setLoading(true);
-    const cleanId = schoolId.trim();
+    const cleanId = studentId.trim();
     const cleanEmail = email.trim().toLowerCase();
 
     try {
@@ -453,13 +453,13 @@ export default function StudentSignUp() {
           <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                School ID *
+                Student ID *
               </label>
               <input
                 type="text"
                 placeholder="Format: 2024-0516"
-                value={schoolId}
-                onChange={(e) => setSchoolId(e.target.value)}
+                value={studentId}
+                onChange={(e) => setStudentId(e.target.value)}
                 style={{
                   width: '100%',
                   padding: '11px 14px',
@@ -720,10 +720,9 @@ export default function StudentSignUp() {
           </form>
         )}
 
-        {/* STEP 3: SUCCESS / VERIFIED SCREEN (Eksaktong disenyo mula sa Pangalawang Larawan) */}
+        {/* STEP 3: SUCCESS / VERIFIED SCREEN */}
         {currentStep === 'success' && (
           <div style={{ textAlign: 'center', padding: '4px 8px 10px 8px' }}>
-            {/* Opisyal na Google Noto Party Popper Logo Container */}
             <div
               style={{
                 width: '74px',
@@ -748,21 +747,17 @@ export default function StudentSignUp() {
                   if (fallback) fallback.style.display = 'block';
                 }}
               />
-              {/* Native Fallback Emoji sakaling mabagal ang network */}
               <span style={{ display: 'none', fontSize: '3.4rem', lineHeight: 1 }}>🎉</span>
             </div>
 
-            {/* Registration Verified Title */}
             <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
               Registration Verified!
             </h3>
 
-            {/* Registration Confirmation Text */}
             <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with School ID <strong>{schoolId || '2023-8407'}</strong>. You may now log in your account.
+              Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in your account.
             </p>
 
-            {/* Malaking Green Button: Back to Sign Up ➔ */}
             <button
               type="button"
               onClick={handleBackToSignUp}
