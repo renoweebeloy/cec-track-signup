@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabaseClient';
 // I-set sa `true` kung nais pansamantalang isara ang portal.
 // I-set sa `false` upang buksan ang pagpaparehistro para sa mga estudyante.
 // =========================================================================
-const IS_SIGNUP_CLOSED = false;
+const IS_SIGNUP_CLOSED = true;
 
 const STEPS = ['Details', 'Verify', 'Done'];
 
@@ -31,8 +31,6 @@ function Styles() {
           background:radial-gradient(800px 380px at 12% -10%,rgba(52,211,153,.38),transparent 60%),radial-gradient(640px 360px at 95% 0,rgba(190,242,100,.2),transparent 60%),linear-gradient(165deg,#075e45,#04261a 75%)}
         .su-page::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
         .su-page>*{position:relative;z-index:1}
-        .su-home{align-self:flex-start;max-width:470px;margin:0 auto 10px;width:100%;background:none;border:0;color:#c9ecdc;font-weight:700;font-size:.86rem;cursor:pointer;padding:6px 2px;text-align:left}
-        .su-home:hover{color:#fff}
         .su-card{width:100%;max-width:470px;background:#fff;border-radius:30px;padding:62px 26px 28px;margin-top:58px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.38);animation:su-rise .6s both}
         @keyframes su-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
         .su-logo{position:absolute;top:-54px;left:50%;transform:translateX(-50%);width:108px;height:108px;border-radius:50%;background:#fff;padding:9px;box-shadow:0 0 0 6px rgba(255,255,255,.18),0 14px 34px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
@@ -161,8 +159,8 @@ export default function StudentSignUp() {
     setNotification({ type: '', message: '' });
 
     const cleanId = studentId.trim();
-    if (!/^\d{4}-\d{4,5}$/.test(cleanId)) {
-      setNotification({ type: 'error', message: 'Invalid Student ID format. Please use the pattern: 2024-0516' });
+    if (!/^[A-Za-z0-9-]{3,25}$/.test(cleanId)) {
+      setNotification({ type: 'error', message: 'Invalid Student ID. Use letters, numbers, and dashes (-) only. Example: 2024-0516' });
       return;
     }
     const cleanEmail = email.trim().toLowerCase();
@@ -282,8 +280,6 @@ export default function StudentSignUp() {
       <Head><title>Student Registration • CECTRACK</title></Head>
       <Styles />
 
-      <button className="su-home" onClick={() => router.push('/')}>← Back to home</button>
-
       <div className="su-card">
         <Logo />
 
@@ -315,7 +311,7 @@ export default function StudentSignUp() {
           <form className="su-form" onSubmit={handleInitiateRegistration}>
             <div>
               <label className="su-l">Student ID *</label>
-              <input className="su-in" type="text" inputMode="numeric" placeholder="Format: 2024-0516" value={studentId} onChange={(e) => setStudentId(e.target.value)} required />
+              <input className="su-in" type="text" autoComplete="off" placeholder="e.g. 2024-0516" value={studentId} onChange={(e) => setStudentId(e.target.value)} required />
             </div>
             <div>
               <label className="su-l">Full name *</label>
