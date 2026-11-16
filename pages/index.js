@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 // =========================================================================
@@ -7,13 +8,97 @@ import { supabase } from '../lib/supabaseClient';
 // I-set sa `true` kung nais pansamantalang isara ang portal.
 // I-set sa `false` upang buksan ang pagpaparehistro para sa mga estudyante.
 // =========================================================================
-const IS_SIGNUP_CLOSED = true;
+const IS_SIGNUP_CLOSED =false;
+
+const STEPS = ['Details', 'Verify', 'Done'];
+
+function Styles() {
+  return (
+    <>
+      <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Figtree:wght@500;600;700;800&display=swap" rel="stylesheet" />
+      </Head>
+      <style jsx global>{`
+        :root{--g9:#04261a;--g8:#064e3b;--g7:#047857;--g6:#059669;--g5:#10b981;--g2:#a7f3d0;--g1:#d1fae5;--g0:#ecfdf5;--ink:#0b2a1e;--mut:#56705f;--line:#cfe5d8}
+        *{box-sizing:border-box}
+        body{margin:0}
+        button{font-family:inherit}
+        :focus-visible{outline:3px solid var(--g5);outline-offset:2px}
+        .su-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px 24px;font-family:'Figtree',system-ui,sans-serif;color:var(--ink);position:relative;overflow:hidden;
+          background:radial-gradient(800px 380px at 12% -10%,rgba(52,211,153,.38),transparent 60%),radial-gradient(640px 360px at 95% 0,rgba(190,242,100,.2),transparent 60%),linear-gradient(165deg,#075e45,#04261a 75%)}
+        .su-page::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+        .su-page>*{position:relative;z-index:1}
+        .su-home{align-self:flex-start;max-width:470px;margin:0 auto 10px;width:100%;background:none;border:0;color:#c9ecdc;font-weight:700;font-size:.86rem;cursor:pointer;padding:6px 2px;text-align:left}
+        .su-home:hover{color:#fff}
+        .su-card{width:100%;max-width:470px;background:#fff;border-radius:30px;padding:62px 26px 28px;margin-top:58px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.38);animation:su-rise .6s both}
+        @keyframes su-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+        .su-logo{position:absolute;top:-54px;left:50%;transform:translateX(-50%);width:108px;height:108px;border-radius:50%;background:#fff;padding:9px;box-shadow:0 0 0 6px rgba(255,255,255,.18),0 14px 34px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+        .su-logo img{width:100%;height:100%;object-fit:contain}
+        .su-head{text-align:center;margin-bottom:18px}
+        .su-head h1{font-family:'Bricolage Grotesque','Figtree',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin:0 0 6px;color:var(--g8)}
+        .su-head p{margin:0;font-size:.9rem;color:var(--mut);line-height:1.55}
+
+        .su-steps{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:18px}
+        .su-s{display:flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;color:#8aa597}
+        .su-s i{width:26px;height:26px;border-radius:50%;background:#e5f3ea;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.76rem;font-weight:800}
+        .su-s.on{color:var(--g7)}
+        .su-s.on i{background:linear-gradient(135deg,var(--g5),var(--g7));color:#fff;box-shadow:0 4px 10px rgba(5,150,105,.3)}
+        .su-line{width:22px;height:2px;background:#d6ebdf;border-radius:2px}
+
+        .su-n{margin-bottom:16px;font-size:.86rem;font-weight:700;line-height:1.45;padding:12px 14px;border-radius:14px;border:1px solid}
+        .su-n.ok{color:#047857;background:var(--g0);border-color:#b7ecd3}
+        .su-n.er{color:#b91c1c;background:#fef2f2;border-color:#fecaca}
+
+        .su-form{display:flex;flex-direction:column;gap:14px}
+        .su-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+        .su-l{display:block;font-size:.84rem;font-weight:700;color:#2f4d3e;margin-bottom:5px}
+        .su-in{width:100%;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);font-size:.95rem;font-family:inherit;font-weight:600;color:var(--ink);background:#fafdfb;outline:0;transition:border-color .2s,box-shadow .2s,background .2s}
+        .su-in:focus{border-color:var(--g5);background:#fff;box-shadow:0 0 0 4px rgba(16,185,129,.16)}
+        .su-btn{width:100%;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px;border:0;border-radius:999px;background:linear-gradient(135deg,var(--g5),var(--g7));color:#fff;font-size:.96rem;font-weight:800;cursor:pointer;box-shadow:0 10px 24px rgba(5,150,105,.34);transition:transform .2s,box-shadow .2s;margin-top:4px}
+        .su-btn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 14px 30px rgba(5,150,105,.42)}
+        .su-btn:disabled{opacity:.55;cursor:not-allowed}
+        .su-btn.alt{background:var(--g0);color:var(--g7);border:1px solid #b7ecd3;box-shadow:none}
+        .su-btn.alt:hover:not(:disabled){background:var(--g1);box-shadow:none}
+        .su-otp{text-align:center;font-family:'Bricolage Grotesque',sans-serif;font-size:1.9rem;font-weight:800;letter-spacing:.5em;padding:14px 8px 14px 18px;border:2px solid var(--g5);background:var(--g0)}
+        .su-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+        .su-lk{background:none;border:0;color:var(--mut);font-size:.86rem;font-weight:700;cursor:pointer;padding:4px 0;display:inline-flex;align-items:center;gap:4px}
+        .su-lk.g{color:var(--g7);font-weight:800}
+        .su-lk:hover:not(:disabled){text-decoration:underline}
+
+        .su-center{text-align:center}
+        .su-check{width:84px;height:84px;margin:6px auto 16px;border-radius:50%;background:linear-gradient(135deg,var(--g5),var(--g7));display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 0 0 8px var(--g1),0 14px 30px rgba(5,150,105,.35);animation:su-pop .5s cubic-bezier(.2,1.4,.4,1) both}
+        @keyframes su-pop{from{transform:scale(.4);opacity:0}to{transform:none;opacity:1}}
+        .su-center h3{font-family:'Bricolage Grotesque',sans-serif;font-size:1.45rem;font-weight:800;margin:0 0 8px;color:var(--g8)}
+        .su-center p{font-size:.92rem;color:var(--mut);line-height:1.6;margin:0 0 22px}
+        .su-center .su-btn+.su-btn{margin-top:10px}
+
+        .su-closed{display:inline-flex;align-items:center;gap:7px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:999px;padding:5px 14px;font-size:.8rem;font-weight:800;margin-bottom:14px}
+        .su-closed i{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:su-pulse 1.8s infinite}
+        @keyframes su-pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+        .su-note{background:var(--g0);border:1px dashed #9fdcbc;border-radius:16px;padding:14px 16px;font-size:.86rem;color:#355a47;line-height:1.55;font-weight:600;text-align:left}
+        .su-foot{margin-top:22px;font-size:.8rem;color:#9fdcbc;font-weight:700;text-align:center}
+
+        @media(max-width:420px){.su-card{padding:60px 18px 24px;border-radius:26px}.su-grid{grid-template-columns:1fr}.su-s span{display:none}.su-s.on span{display:inline}}
+        @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+      `}</style>
+    </>
+  );
+}
+
+const Logo = () => (
+  <div className="su-logo">
+    <img src="/logo.png" alt="CEC-TRACK Logo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+  </div>
+);
+const Foot = () => <div className="su-foot">© 2026 CEC-TRACK • DOrSU Cateel Extension Campus</div>;
 
 export default function StudentSignUp() {
-  // Navigation Steps: 'form' -> 'otp' -> 'success'
-  const [currentStep, setCurrentStep] = useState('form');
+  const router = useRouter();
+  const [currentStep, setCurrentStep] = useState('form'); // 'form' -> 'otp' -> 'success'
 
-  // Form Fields
   const [studentId, setStudentId] = useState('');
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
@@ -21,12 +106,10 @@ export default function StudentSignUp() {
   const [yearLevel, setYearLevel] = useState('1st Year');
   const [section, setSection] = useState('Section A');
 
-  // OTP Verification States
   const [serverOtp, setServerOtp] = useState('');
   const [userOtp, setUserOtp] = useState('');
   const [otpExpiry, setOtpExpiry] = useState(null);
 
-  // UI Status
   const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({ type: '', message: '' });
 
@@ -40,119 +123,26 @@ export default function StudentSignUp() {
     { code: 'BEED', name: 'Bachelor of Elementary Education' },
     { code: 'BSAM', name: 'BS in Agribusiness Management' },
   ];
-
-  const sectionsList = [
-    'Section A', 'Section B', 'Section C', 'Section D', 'Section E',
-    'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K',
-  ];
+  const sectionsList = ['Section A', 'Section B', 'Section C', 'Section D', 'Section E', 'Section F', 'Section G', 'Section H', 'Section I', 'Section J', 'Section K'];
 
   // =========================================================================
   // SCREEN KUNG PANSAMANTALANG NAKASARA ANG PORTAL
   // =========================================================================
   if (IS_SIGNUP_CLOSED) {
     return (
-      <div
-        style={{
-          minHeight: '100vh',
-          backgroundColor: '#f8fafc',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          padding: '32px 16px',
-          fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        }}
-      >
-        <Head>
-          <title>Portal Closed • CECTRACK</title>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-        </Head>
-
-        <div
-          style={{
-            width: '100%',
-            maxWidth: '460px',
-            backgroundColor: '#ffffff',
-            borderRadius: '24px',
-            padding: '36px 28px',
-            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.06)',
-            border: '1px solid #e2e8f0',
-            boxSizing: 'border-box',
-            textAlign: 'center',
-          }}
-        >
-          <div
-            style={{
-              width: '68px',
-              height: '68px',
-              margin: '0 auto 16px auto',
-              borderRadius: '18px',
-              backgroundColor: '#f0fdf4',
-              border: '1.5px solid #bbf7d0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              boxShadow: '0 4px 14px rgba(34, 197, 94, 0.12)',
-            }}
-          >
-            <img
-              src="/logo.png"
-              alt="CEC-TRACK Logo"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-              style={{ width: '48px', height: '48px', objectFit: 'contain' }}
-            />
-          </div>
-
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#fef2f2',
-              color: '#b91c1c',
-              border: '1px solid #fecaca',
-              padding: '4px 14px',
-              borderRadius: '9999px',
-              fontSize: '0.72rem',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              marginBottom: '14px',
-            }}
-          >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }}></span>
-            TEMPORARILY CLOSED
-          </span>
-
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#0f172a', margin: '0 0 12px 0' }}>
-            Sign-Up Portal Is Closed
-          </h1>
-
-          <p style={{ fontSize: '0.90rem', color: '#64748b', lineHeight: 1.6, margin: '0 0 20px 0' }}>
-            This website of sign up is closed. It will be open and available soon, so please come back soon. This website is not available right now because it is temporarily closed.
-          </p>
-
-          <div
-            style={{
-              backgroundColor: '#f8fafc',
-              border: '1px dashed #cbd5e1',
-              borderRadius: '14px',
-              padding: '14px 16px',
-              fontSize: '0.80rem',
-              color: '#475569',
-              lineHeight: 1.5,
-              fontWeight: 600,
-            }}
-          >
+      <div className="su-page">
+        <Head><title>Portal Closed • CECTRACK</title></Head>
+        <Styles />
+        <div className="su-card su-center">
+          <Logo />
+          <span className="su-closed"><i /> Temporarily closed</span>
+          <div className="su-head"><h1>Sign-up portal is closed</h1></div>
+          <p>This sign-up website is closed for now. It will open again soon, so please come back later.</p>
+          <div className="su-note">
             📢 <strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.
           </div>
         </div>
-
-        <div style={{ marginTop: '24px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.04em' }}>
-          © 2026 CEC-TRACK • DOrSU CATEEL EXTENSION CAMPUS
-        </div>
+        <Foot />
       </div>
     );
   }
@@ -161,11 +151,7 @@ export default function StudentSignUp() {
   // NORMAL NA REGISTRATION LOGIC
   // =========================================================================
   const handleBackToSignUp = () => {
-    setStudentId('');
-    setFullName('');
-    setEmail('');
-    setUserOtp('');
-    setServerOtp('');
+    setStudentId(''); setFullName(''); setEmail(''); setUserOtp(''); setServerOtp('');
     setNotification({ type: '', message: '' });
     setCurrentStep('form');
   };
@@ -175,27 +161,17 @@ export default function StudentSignUp() {
     setNotification({ type: '', message: '' });
 
     const cleanId = studentId.trim();
-    const idPattern = /^\d{4}-\d{4,5}$/;
-    if (!idPattern.test(cleanId)) {
-      setNotification({
-        type: 'error',
-        message: 'Invalid Student ID format. Please use the pattern: 2024-0516',
-      });
+    if (!/^\d{4}-\d{4,5}$/.test(cleanId)) {
+      setNotification({ type: 'error', message: 'Invalid Student ID format. Please use the pattern: 2024-0516' });
       return;
     }
-
     const cleanEmail = email.trim().toLowerCase();
-    const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (!gmailPattern.test(cleanEmail)) {
-      setNotification({
-        type: 'error',
-        message: 'Invalid email address. Please enter a valid Gmail account ending with @gmail.com',
-      });
+    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(cleanEmail)) {
+      setNotification({ type: 'error', message: 'Invalid email address. Please enter a valid Gmail account ending with @gmail.com' });
       return;
     }
 
     setLoading(true);
-
     try {
       const { data: existingUser } = await supabase
         .from('profiles')
@@ -204,12 +180,8 @@ export default function StudentSignUp() {
         .maybeSingle();
 
       if (existingUser) {
-        if (existingUser.school_id === cleanId) {
-          throw new Error(`Student ID "${cleanId}" is already registered.`);
-        }
-        if (existingUser.email === cleanEmail) {
-          throw new Error(`Email "${cleanEmail}" is already associated with another account.`);
-        }
+        if (existingUser.school_id === cleanId) throw new Error(`Student ID "${cleanId}" is already registered.`);
+        if (existingUser.email === cleanEmail) throw new Error(`Email "${cleanEmail}" is already associated with another account.`);
       }
 
       const generatedCode = Math.floor(100000 + Math.random() * 900000).toString();
@@ -220,24 +192,13 @@ export default function StudentSignUp() {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: cleanEmail,
-          code: generatedCode,
-          name: fullName.trim(),
-          type: 'registration',
-        }),
+        body: JSON.stringify({ email: cleanEmail, code: generatedCode, name: fullName.trim(), type: 'registration' }),
       });
 
       setCurrentStep('otp');
-      setNotification({
-        type: 'success',
-        message: `Verification code sent to ${cleanEmail}. Please check your inbox or spam folder.`,
-      });
+      setNotification({ type: 'success', message: `Verification code sent to ${cleanEmail}. Please check your inbox or spam folder.` });
     } catch (err) {
-      setNotification({
-        type: 'error',
-        message: err.message || 'Failed to send verification code. Please try again.',
-      });
+      setNotification({ type: 'error', message: err.message || 'Failed to send verification code. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -248,25 +209,17 @@ export default function StudentSignUp() {
     setNotification({ type: '', message: '' });
 
     if (Date.now() > otpExpiry) {
-      setNotification({
-        type: 'error',
-        message: 'The verification code has expired. Please request a new code.',
-      });
+      setNotification({ type: 'error', message: 'The verification code has expired. Please request a new code.' });
       return;
     }
-
     if (userOtp.trim() !== serverOtp) {
-      setNotification({
-        type: 'error',
-        message: 'Incorrect verification code. Please check your email and try again.',
-      });
+      setNotification({ type: 'error', message: 'Incorrect verification code. Please check your email and try again.' });
       return;
     }
 
     setLoading(true);
     const cleanId = studentId.trim();
     const cleanEmail = email.trim().toLowerCase();
-
     try {
       const { error: insertError } = await supabase.from('profiles').insert([
         {
@@ -274,28 +227,21 @@ export default function StudentSignUp() {
           full_name: fullName.trim(),
           email: cleanEmail,
           password: cleanId,
-          course: course,
+          course,
           year_level: yearLevel,
-          section: section,
+          section,
           role: 'student',
           can_scan: false,
           status: 'Active',
           must_change_password: true,
         },
       ]);
-
       if (insertError) throw new Error(insertError.message);
 
       setCurrentStep('success');
-      setNotification({
-        type: 'success',
-        message: 'Account successfully verified and registered!',
-      });
+      setNotification({ type: 'success', message: 'Account successfully verified and registered!' });
     } catch (err) {
-      setNotification({
-        type: 'error',
-        message: err.message || 'Failed to complete registration.',
-      });
+      setNotification({ type: 'error', message: err.message || 'Failed to complete registration.' });
     } finally {
       setLoading(false);
     }
@@ -307,484 +253,150 @@ export default function StudentSignUp() {
     const newCode = Math.floor(100000 + Math.random() * 900000).toString();
     setServerOtp(newCode);
     setOtpExpiry(Date.now() + 10 * 60 * 1000);
-
     try {
       await fetch(SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim().toLowerCase(),
-          code: newCode,
-          name: fullName.trim(),
-          type: 'registration',
-        }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: newCode, name: fullName.trim(), type: 'registration' }),
       });
-      setNotification({
-        type: 'success',
-        message: 'A fresh verification code has been dispatched to your email.',
-      });
+      setNotification({ type: 'success', message: 'A fresh verification code has been dispatched to your email.' });
     } catch (err) {
-      setNotification({
-        type: 'error',
-        message: 'Unable to resend code. Please try again.',
-      });
+      setNotification({ type: 'error', message: 'Unable to resend code. Please try again.' });
     } finally {
       setLoading(false);
     }
   };
 
+  const stepIdx = currentStep === 'form' ? 0 : currentStep === 'otp' ? 1 : 2;
+  const title = currentStep === 'otp' ? 'Email verification' : currentStep === 'success' ? 'Verified!' : 'Student sign up';
+  const subtitle =
+    currentStep === 'otp'
+      ? 'Enter the 6-digit authentication code sent to your Gmail inbox.'
+      : currentStep === 'success'
+      ? 'Your account has been officially verified and activated.'
+      : 'Submit your student details to activate your digital attendance profile.';
+
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        backgroundColor: '#f8fafc',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '32px 16px',
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      }}
-    >
-      <Head>
-        <title>Student Registration • CECTRACK</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-      </Head>
+    <div className="su-page">
+      <Head><title>Student Registration • CECTRACK</title></Head>
+      <Styles />
 
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '460px',
-          backgroundColor: '#ffffff',
-          borderRadius: '28px',
-          padding: '36px 24px',
-          boxShadow: '0 12px 36px rgba(0, 0, 0, 0.05)',
-          border: '1px solid #e2e8f0',
-          boxSizing: 'border-box',
-          position: 'relative',
-        }}
-      >
-        {/* Header Section */}
-        <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-          {/* Ang logo ay lilitaw LAMANG sa Step 1 */}
-          {currentStep === 'form' && (
-            <div
-              style={{
-                width: '68px',
-                height: '68px',
-                margin: '0 auto 14px auto',
-                borderRadius: '18px',
-                backgroundColor: '#f0fdf4',
-                border: '1.5px solid #bbf7d0',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 14px rgba(34, 197, 94, 0.12)',
-              }}
-            >
-              <img
-                src="/logo.png"
-                alt="CEC-TRACK Logo"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                }}
-                style={{ width: '48px', height: '48px', objectFit: 'contain' }}
-              />
-            </div>
-          )}
+      <button className="su-home" onClick={() => router.push('/')}>← Back to home</button>
 
-          {/* Badge: CEC-TRACK */}
-          <span
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: '#f0fdf4',
-              color: '#15803d',
-              border: '1px solid #bbf7d0',
-              padding: '4px 14px',
-              borderRadius: '9999px',
-              fontSize: '0.72rem',
-              fontWeight: 900,
-              textTransform: 'uppercase',
-              letterSpacing: '0.06em',
-              marginBottom: '10px',
-            }}
-          >
-            <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#15803d' }}></span>
-            CEC-TRACK
-          </span>
+      <div className="su-card">
+        <Logo />
 
-          <h1 style={{ fontSize: '1.65rem', fontWeight: 900, color: '#0f172a', margin: '0 0 6px 0' }}>
-            {currentStep === 'otp' ? 'Email Verification' : currentStep === 'success' ? 'Verified!' : 'Student Sign Up'}
-          </h1>
-          <p style={{ fontSize: '0.84rem', color: '#64748b', margin: 0, lineHeight: 1.45 }}>
-            {currentStep === 'otp'
-              ? 'Enter the 6-digit authentication code sent to your Gmail inbox.'
-              : currentStep === 'success'
-              ? 'Your account has been officially verified and activated.'
-              : 'Submit your student details to activate your digital attendance profile.'}
-          </p>
+        <div className="su-steps" aria-label="Registration progress">
+          {STEPS.map((s, i) => (
+            <React.Fragment key={s}>
+              {i > 0 && <span className="su-line" />}
+              <div className={`su-s ${i <= stepIdx ? 'on' : ''}`}>
+                <i>{i < stepIdx ? '✓' : i + 1}</i>
+                <span>{s}</span>
+              </div>
+            </React.Fragment>
+          ))}
         </div>
 
-        {/* Feedback Alert Box */}
+        <div className="su-head">
+          <h1>{title}</h1>
+          <p>{subtitle}</p>
+        </div>
+
         {notification.message && (
-          <div
-            style={{
-              marginBottom: '18px',
-              fontSize: '0.82rem',
-              fontWeight: 700,
-              textAlign: currentStep === 'success' ? 'center' : 'left',
-              color: notification.type === 'error' ? '#b91c1c' : '#15803d',
-              backgroundColor: notification.type === 'error' ? '#fef2f2' : '#f0fdf4',
-              border: `1px solid ${notification.type === 'error' ? '#fee2e2' : '#bbf7d0'}`,
-              padding: '12px 14px',
-              borderRadius: '12px',
-              lineHeight: 1.4,
-            }}
-          >
+          <div className={`su-n ${notification.type === 'error' ? 'er' : 'ok'}`} style={{ textAlign: currentStep === 'success' ? 'center' : 'left' }}>
             {notification.message}
           </div>
         )}
 
-        {/* STEP 1: INITIAL REGISTRATION FORM */}
+        {/* STEP 1: FORM */}
         {currentStep === 'form' && (
-          <form onSubmit={handleInitiateRegistration} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          <form className="su-form" onSubmit={handleInitiateRegistration}>
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Student ID *
-              </label>
-              <input
-                type="text"
-                placeholder="Format: 2024-0516"
-                value={studentId}
-                onChange={(e) => setStudentId(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  borderRadius: '11px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.9rem',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                }}
-                required
-              />
+              <label className="su-l">Student ID *</label>
+              <input className="su-in" type="text" inputMode="numeric" placeholder="Format: 2024-0516" value={studentId} onChange={(e) => setStudentId(e.target.value)} required />
             </div>
-
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Full Name *
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Juan Dela Cruz"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  borderRadius: '11px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.9rem',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                }}
-                required
-              />
+              <label className="su-l">Full name *</label>
+              <input className="su-in" type="text" placeholder="e.g. Juan Dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
             </div>
-
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Gmail Address *
-              </label>
-              <input
-                type="email"
-                placeholder="e.g. student@gmail.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '11px 14px',
-                  borderRadius: '11px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.9rem',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                }}
-                required
-              />
+              <label className="su-l">Gmail address *</label>
+              <input className="su-in" type="email" placeholder="e.g. student@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+            <div className="su-grid">
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                  Course *
-                </label>
-                <select
-                  value={course}
-                  onChange={(e) => setCourse(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 12px',
-                    borderRadius: '11px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    backgroundColor: '#ffffff',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
-                >
-                  {coursesList.map((c) => (
-                    <option key={c.code} value={c.code}>
-                      {c.code}
-                    </option>
-                  ))}
+                <label className="su-l">Course *</label>
+                <select className="su-in" value={course} onChange={(e) => setCourse(e.target.value)}>
+                  {coursesList.map((c) => (<option key={c.code} value={c.code}>{c.code}</option>))}
                 </select>
               </div>
-
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                  Year Level *
-                </label>
-                <select
-                  value={yearLevel}
-                  onChange={(e) => setYearLevel(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '11px 12px',
-                    borderRadius: '11px',
-                    border: '1px solid #cbd5e1',
-                    fontSize: '0.88rem',
-                    backgroundColor: '#ffffff',
-                    boxSizing: 'border-box',
-                    outline: 'none',
-                  }}
-                >
-                  <option value="1st Year">1st Year</option>
-                  <option value="2nd Year">2nd Year</option>
-                  <option value="3rd Year">3rd Year</option>
-                  <option value="4th Year">4th Year</option>
+                <label className="su-l">Year level *</label>
+                <select className="su-in" value={yearLevel} onChange={(e) => setYearLevel(e.target.value)}>
+                  {['1st Year', '2nd Year', '3rd Year', '4th Year'].map((y) => (<option key={y} value={y}>{y}</option>))}
                 </select>
               </div>
             </div>
-
             <div>
-              <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '4px' }}>
-                Section *
-              </label>
-              <select
-                value={section}
-                onChange={(e) => setSection(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '11px 12px',
-                  borderRadius: '11px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '0.88rem',
-                  backgroundColor: '#ffffff',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                }}
-              >
-                {sectionsList.map((sec) => (
-                  <option key={sec} value={sec}>
-                    {sec}
-                  </option>
-                ))}
+              <label className="su-l">Section *</label>
+              <select className="su-in" value={section} onChange={(e) => setSection(e.target.value)}>
+                {sectionsList.map((sec) => (<option key={sec} value={sec}>{sec}</option>))}
               </select>
             </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              style={{
-                width: '100%',
-                padding: '13px',
-                backgroundColor: '#15803d',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '0.94rem',
-                fontWeight: 900,
-                cursor: loading ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
-                marginTop: '8px',
-                touchAction: 'manipulation',
-              }}
-            >
-              {loading ? 'Sending Verification Code...' : 'Complete Registration ➔'}
+            <button type="submit" className="su-btn" disabled={loading}>
+              {loading ? 'Sending verification code...' : 'Complete registration'}
             </button>
           </form>
         )}
 
-        {/* STEP 2: OTP VERIFICATION SCREEN */}
+        {/* STEP 2: OTP */}
         {currentStep === 'otp' && (
-          <form onSubmit={handleVerifyOtp} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 800, color: '#334155', marginBottom: '8px' }}>
-                Enter 6-Digit Verification Code
-              </label>
+          <form className="su-form" onSubmit={handleVerifyOtp}>
+            <div>
+              <label className="su-l" style={{ textAlign: 'center' }}>Enter 6-digit verification code</label>
               <input
+                className="su-in su-otp"
                 type="text"
+                inputMode="numeric"
                 maxLength="6"
-                placeholder="• • • • • •"
+                placeholder="••••••"
                 value={userOtp}
                 onChange={(e) => setUserOtp(e.target.value.replace(/\D/g, ''))}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  border: '2px solid #15803d',
-                  fontSize: '1.6rem',
-                  fontWeight: 900,
-                  textAlign: 'center',
-                  letterSpacing: '8px',
-                  boxSizing: 'border-box',
-                  outline: 'none',
-                  backgroundColor: '#f8fafc',
-                }}
                 required
                 autoFocus
               />
             </div>
-
-            <button
-              type="submit"
-              disabled={loading || userOtp.length < 6}
-              style={{
-                width: '100%',
-                padding: '13px',
-                backgroundColor: '#15803d',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '0.94rem',
-                fontWeight: 900,
-                cursor: loading || userOtp.length < 6 ? 'not-allowed' : 'pointer',
-                boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
-              }}
-            >
-              {loading ? 'Verifying Code...' : 'Authorize & Activate Account ➔'}
+            <button type="submit" className="su-btn" disabled={loading || userOtp.length < 6}>
+              {loading ? 'Verifying code...' : 'Verify and activate account'}
             </button>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-              <button
-                type="button"
-                onClick={() => setCurrentStep('form')}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  background: 'none',
-                  border: 'none',
-                  color: '#475569',
-                  fontSize: '0.82rem',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  padding: '4px 0',
-                }}
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#475569"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="15 18 9 12 15 6"></polyline>
-                </svg>
-                <span>Back to Edit Details</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleResendOtp}
-                disabled={loading}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  color: '#15803d',
-                  fontSize: '0.82rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                }}
-              >
-                Resend Code
-              </button>
+            <div className="su-row">
+              <button type="button" className="su-lk" onClick={() => setCurrentStep('form')}>← Edit details</button>
+              <button type="button" className="su-lk g" onClick={handleResendOtp} disabled={loading}>Resend code</button>
             </div>
           </form>
         )}
 
-        {/* STEP 3: SUCCESS / VERIFIED SCREEN */}
+        {/* STEP 3: SUCCESS */}
         {currentStep === 'success' && (
-          <div style={{ textAlign: 'center', padding: '4px 8px 10px 8px' }}>
-            <div
-              style={{
-                width: '74px',
-                height: '74px',
-                margin: '10px auto 14px auto',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <img
-                src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f389.svg"
-                alt="Celebration Party Popper"
-                style={{
-                  width: '68px',
-                  height: '68px',
-                  objectFit: 'contain',
-                }}
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  const fallback = e.currentTarget.nextElementSibling;
-                  if (fallback) fallback.style.display = 'block';
-                }}
-              />
-              <span style={{ display: 'none', fontSize: '3.4rem', lineHeight: 1 }}>🎉</span>
+          <div className="su-center">
+            <div className="su-check">
+              <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </div>
-
-            <h3 style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0f172a', margin: '0 0 8px 0' }}>
-              Registration Verified!
-            </h3>
-
-            <p style={{ fontSize: '0.86rem', color: '#64748b', margin: '0 0 24px 0', lineHeight: 1.55 }}>
-              Your account has been officially registered with Student ID <strong>{studentId || '2023-8407'}</strong>. You may now log in your account.
+            <h3>Registration verified!</h3>
+            <p>
+              Your account is registered with Student ID <strong>{studentId}</strong>. You can now log in to your account.
             </p>
-
-            <button
-              type="button"
-              onClick={handleBackToSignUp}
-              style={{
-                display: 'block',
-                width: '100%',
-                padding: '13px',
-                backgroundColor: '#15803d',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '0.94rem',
-                fontWeight: 900,
-                textAlign: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(21, 128, 61, 0.25)',
-              }}
-            >
-              Back to Sign Up ➔
-            </button>
+            <button type="button" className="su-btn" onClick={() => router.push('/login')}>Go to login</button>
+            <button type="button" className="su-btn alt" onClick={handleBackToSignUp}>Register another student</button>
           </div>
         )}
       </div>
 
-      <div style={{ marginTop: '24px', fontSize: '0.72rem', color: '#94a3b8', fontWeight: 800, letterSpacing: '0.04em' }}>
-        © 2026 CEC-TRACK • DOrSU CATEEL EXTENSION CAMPUS
-      </div>
+      <Foot />
     </div>
   );
 }
