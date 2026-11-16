@@ -28,12 +28,12 @@ function Styles() {
         button{font-family:inherit}
         :focus-visible{outline:3px solid var(--g5);outline-offset:2px}
         .su-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px 16px 24px;font-family:'Figtree',system-ui,sans-serif;color:var(--ink);position:relative;overflow:hidden;
-          background:radial-gradient(800px 380px at 12% -10%,rgba(52,211,153,.38),transparent 60%),radial-gradient(640px 360px at 95% 0,rgba(190,242,100,.2),transparent 60%),linear-gradient(165deg,#075e45,#04261a 75%)}
-        .su-page::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.08) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
+          background:radial-gradient(700px 340px at 6% -8%,rgba(16,185,129,.2),transparent 60%),radial-gradient(600px 320px at 100% 0,rgba(163,230,53,.16),transparent 60%),radial-gradient(760px 380px at 50% 112%,rgba(16,185,129,.12),transparent 60%),#ffffff}
+        .su-page::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(5,150,105,.09) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
         .su-page>*{position:relative;z-index:1}
-        .su-card{width:100%;max-width:470px;background:#fff;border-radius:30px;padding:62px 26px 28px;margin-top:58px;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.38);animation:su-rise .6s both}
+        .su-card{width:100%;max-width:470px;background:#fff;border-radius:30px;padding:62px 26px 28px;margin-top:58px;position:relative;box-shadow:0 0 0 1px #d6ebdf,0 24px 60px rgba(6,78,59,.14);animation:su-rise .6s both}
         @keyframes su-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-        .su-logo{position:absolute;top:-54px;left:50%;transform:translateX(-50%);width:108px;height:108px;border-radius:50%;background:#fff;padding:9px;box-shadow:0 0 0 6px rgba(255,255,255,.18),0 14px 34px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center}
+        .su-logo{position:absolute;top:-54px;left:50%;transform:translateX(-50%);width:108px;height:108px;border-radius:50%;background:#fff;padding:9px;box-shadow:0 0 0 1px #d6ebdf,0 0 0 7px var(--g0),0 12px 28px rgba(5,150,105,.28);display:flex;align-items:center;justify-content:center}
         .su-logo img{width:100%;height:100%;object-fit:contain}
         .su-head{text-align:center;margin-bottom:18px}
         .su-head h1{font-family:'Bricolage Grotesque','Figtree',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin:0 0 6px;color:var(--g8)}
@@ -77,7 +77,7 @@ function Styles() {
         .su-closed i{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:su-pulse 1.8s infinite}
         @keyframes su-pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
         .su-note{background:var(--g0);border:1px dashed #9fdcbc;border-radius:16px;padding:14px 16px;font-size:.86rem;color:#355a47;line-height:1.55;font-weight:600;text-align:left}
-        .su-foot{margin-top:22px;font-size:.8rem;color:#9fdcbc;font-weight:700;text-align:center}
+        .su-foot{margin-top:22px;font-size:.8rem;color:#4f7a63;font-weight:700;text-align:center}
 
         @media(max-width:420px){.su-card{padding:60px 18px 24px;border-radius:26px}.su-grid{grid-template-columns:1fr}.su-s span{display:none}.su-s.on span{display:inline}}
         @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
