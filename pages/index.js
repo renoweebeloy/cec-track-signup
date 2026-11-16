@@ -164,8 +164,8 @@ export default function StudentSignUp() {
       return;
     }
     const cleanEmail = email.trim().toLowerCase();
-    if (!/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(cleanEmail)) {
-      setNotification({ type: 'error', message: 'Invalid email address. Please enter a valid Gmail account ending with @gmail.com' });
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+$/.test(cleanEmail)) {
+      setNotification({ type: 'error', message: 'Invalid email address. Please enter a valid email (example: juan@gmail.com or juan@dorsu.edu.ph).' });
       return;
     }
 
@@ -270,7 +270,7 @@ export default function StudentSignUp() {
   const title = currentStep === 'otp' ? 'Email verification' : currentStep === 'success' ? 'Verified!' : 'Student sign up';
   const subtitle =
     currentStep === 'otp'
-      ? 'Enter the 6-digit authentication code sent to your Gmail inbox.'
+      ? 'Enter the 6-digit authentication code sent to your email inbox.'
       : currentStep === 'success'
       ? 'Your account has been officially verified and activated.'
       : 'Submit your student details to activate your digital attendance profile.';
@@ -318,8 +318,8 @@ export default function StudentSignUp() {
               <input className="su-in" type="text" placeholder="e.g. Juan Dela Cruz" value={fullName} onChange={(e) => setFullName(e.target.value)} required />
             </div>
             <div>
-              <label className="su-l">Gmail address *</label>
-              <input className="su-in" type="email" placeholder="e.g. student@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <label className="su-l">Email address *</label>
+              <input className="su-in" type="email" placeholder="e.g. juan@gmail.com or juan@dorsu.edu.ph" value={email} onChange={(e) => setEmail(e.target.value)} required />
             </div>
             <div className="su-grid">
               <div>
