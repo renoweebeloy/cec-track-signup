@@ -132,7 +132,7 @@ export default function StudentSignUp() {
         <div className="su-card su-center">
           <Logo />
           <span className="su-closed"><i /> Temporarily closed</span>
-          <div className="su-head"><h1>Sign-up portal is closed</h1></div>
+          <div className="su-head"><h1>Sign-up CECTRACK portal is closed</h1></div>
           <p>This sign-up website is closed for now. It will open again soon, so please come back later.</p>
           <div className="su-note">
             📢 <strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.
