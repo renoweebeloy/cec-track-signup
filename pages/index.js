@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 import { supabase } from '../lib/supabaseClient';
 
 // =========================================================================
@@ -94,7 +93,6 @@ const Logo = () => (
 const Foot = () => <div className="su-foot">© 2026 CEC-TRACK • DOrSU Cateel Extension Campus</div>;
 
 export default function StudentSignUp() {
-  const router = useRouter();
   const [currentStep, setCurrentStep] = useState('form'); // 'form' -> 'otp' -> 'success'
 
   const [studentId, setStudentId] = useState('');
@@ -386,7 +384,6 @@ export default function StudentSignUp() {
             <p>
               Your account is registered with Student ID <strong>{studentId}</strong>. You can now log in to your account.
             </p>
-            <button type="button" className="su-btn" onClick={() => router.push('/login')}>Go to login</button>
             <button type="button" className="su-btn alt" onClick={handleBackToSignUp}>Register another student</button>
           </div>
         )}
