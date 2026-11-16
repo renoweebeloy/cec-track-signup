@@ -7,7 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 // I-set sa `true` kung nais pansamantalang isara ang portal.
 // I-set sa `false` upang buksan ang pagpaparehistro para sa mga estudyante.
 // =========================================================================
-const IS_SIGNUP_CLOSED = true;
+const IS_SIGNUP_CLOSED = false;
 
 const STEPS = ['Details', 'Verify', 'Done'];
 
