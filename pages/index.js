@@ -74,7 +74,6 @@ function Styles() {
         .su-closed i{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:su-pulse 1.8s infinite}
         @keyframes su-pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
         .su-note{display:flex;gap:10px;align-items:flex-start;background:var(--g0);border:1px dashed #9fdcbc;border-radius:16px;padding:14px 16px;font-size:.86rem;color:#355a47;line-height:1.55;font-weight:600;text-align:left}
-        .su-foot{margin-top:22px;font-size:.8rem;color:#4f7a63;font-weight:700;text-align:center}
 
         @media(max-width:420px){.su-card{padding:26px 18px 24px;border-radius:26px}.su-grid{grid-template-columns:1fr}.su-s span{display:none}.su-s.on span{display:inline}}
         @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -82,8 +81,6 @@ function Styles() {
     </>
   );
 }
-
-const Foot = () => <div className="su-foot">© 2026 CEC-TRACK • DOrSU Cateel Extension Campus</div>;
 
 export default function StudentSignUp() {
   const [currentStep, setCurrentStep] = useState('form'); // 'form' -> 'otp' -> 'success'
@@ -134,7 +131,6 @@ export default function StudentSignUp() {
             <span><strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.</span>
           </div>
         </div>
-        <Foot />
       </div>
     );
   }
@@ -382,8 +378,6 @@ export default function StudentSignUp() {
           </div>
         )}
       </div>
-
-      <Foot />
     </div>
   );
 }
