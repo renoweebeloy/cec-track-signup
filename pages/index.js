@@ -30,10 +30,8 @@ function Styles() {
           background:radial-gradient(700px 340px at 6% -8%,rgba(16,185,129,.2),transparent 60%),radial-gradient(600px 320px at 100% 0,rgba(163,230,53,.16),transparent 60%),radial-gradient(760px 380px at 50% 112%,rgba(16,185,129,.12),transparent 60%),#ffffff}
         .su-page::after{content:'';position:absolute;inset:0;background-image:radial-gradient(rgba(5,150,105,.09) 1px,transparent 1px);background-size:22px 22px;pointer-events:none}
         .su-page>*{position:relative;z-index:1}
-        .su-card{width:100%;max-width:470px;background:#fff;border-radius:30px;padding:62px 26px 28px;margin-top:58px;position:relative;box-shadow:0 0 0 1px #d6ebdf,0 24px 60px rgba(6,78,59,.14);animation:su-rise .6s both}
+        .su-card{width:100%;max-width:470px;background:#fff;border-radius:30px;padding:30px 26px 28px;position:relative;box-shadow:0 0 0 1px #d6ebdf,0 24px 60px rgba(6,78,59,.14);animation:su-rise .6s both}
         @keyframes su-rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-        .su-logo{position:absolute;top:-54px;left:50%;transform:translateX(-50%);width:108px;height:108px;border-radius:50%;background:#fff;padding:9px;box-shadow:0 0 0 1px #d6ebdf,0 0 0 7px var(--g0),0 12px 28px rgba(5,150,105,.28);display:flex;align-items:center;justify-content:center}
-        .su-logo img{width:100%;height:100%;object-fit:contain}
         .su-head{text-align:center;margin-bottom:18px}
         .su-head h1{font-family:'Bricolage Grotesque','Figtree',sans-serif;font-size:1.75rem;font-weight:800;letter-spacing:-.03em;margin:0 0 6px;color:var(--g8)}
         .su-head p{margin:0;font-size:.9rem;color:var(--mut);line-height:1.55}
@@ -75,21 +73,16 @@ function Styles() {
         .su-closed{display:inline-flex;align-items:center;gap:7px;background:#fef2f2;color:#b91c1c;border:1px solid #fecaca;border-radius:999px;padding:5px 14px;font-size:.8rem;font-weight:800;margin-bottom:14px}
         .su-closed i{width:7px;height:7px;border-radius:50%;background:#ef4444;animation:su-pulse 1.8s infinite}
         @keyframes su-pulse{0%{box-shadow:0 0 0 0 rgba(239,68,68,.6)}70%{box-shadow:0 0 0 7px rgba(239,68,68,0)}100%{box-shadow:0 0 0 0 rgba(239,68,68,0)}}
-        .su-note{background:var(--g0);border:1px dashed #9fdcbc;border-radius:16px;padding:14px 16px;font-size:.86rem;color:#355a47;line-height:1.55;font-weight:600;text-align:left}
+        .su-note{display:flex;gap:10px;align-items:flex-start;background:var(--g0);border:1px dashed #9fdcbc;border-radius:16px;padding:14px 16px;font-size:.86rem;color:#355a47;line-height:1.55;font-weight:600;text-align:left}
         .su-foot{margin-top:22px;font-size:.8rem;color:#4f7a63;font-weight:700;text-align:center}
 
-        @media(max-width:420px){.su-card{padding:60px 18px 24px;border-radius:26px}.su-grid{grid-template-columns:1fr}.su-s span{display:none}.su-s.on span{display:inline}}
+        @media(max-width:420px){.su-card{padding:26px 18px 24px;border-radius:26px}.su-grid{grid-template-columns:1fr}.su-s span{display:none}.su-s.on span{display:inline}}
         @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
       `}</style>
     </>
   );
 }
 
-const Logo = () => (
-  <div className="su-logo">
-    <img src="/logo.png" alt="CEC-TRACK Logo" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
-  </div>
-);
 const Foot = () => <div className="su-foot">© 2026 CEC-TRACK • DOrSU Cateel Extension Campus</div>;
 
 export default function StudentSignUp() {
@@ -130,12 +123,15 @@ export default function StudentSignUp() {
         <Head><title>Portal Closed • CECTRACK</title></Head>
         <Styles />
         <div className="su-card su-center">
-          <Logo />
           <span className="su-closed"><i /> Temporarily closed</span>
           <div className="su-head"><h1>Sign-up CECTRACK portal is closed</h1></div>
-          <p>This sign-up website is closed for now. It will open again soon, so please come back later.</p>
+          <p>This sign-up website is closed for now because of security reasons, to protect privacy and data. It will open again soon, so please come back later.</p>
           <div className="su-note">
-            📢 <strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M12 8v4M12 16h.01" />
+            </svg>
+            <span><strong>Notice:</strong> Please wait for official announcements from your campus administration regarding the registration schedule.</span>
           </div>
         </div>
         <Foot />
@@ -279,8 +275,6 @@ export default function StudentSignUp() {
       <Styles />
 
       <div className="su-card">
-        <Logo />
-
         <div className="su-steps" aria-label="Registration progress">
           {STEPS.map((s, i) => (
             <React.Fragment key={s}>
